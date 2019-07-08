@@ -1,0 +1,42 @@
+{
+	"name": "Sleepover 2",
+	"tree": {
+		"$className": "DataModel",
+
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"$path": "src/scripts/server"
+		},
+
+		"ServerStorage": {
+			"$className": "ServerStorage",
+			"server": {
+				"$className": "Folder",
+				"$path": "src/server"
+			}
+		},
+
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"shared": {
+				"$className": "Folder",
+				"$path": "src/shared"
+			}
+		},
+
+		"PlayerScripts": {
+			"$className": "PlayerScripts",
+			"StarterPlayerScripts": {
+				"$className": "StarterPlayerScripts",
+				"scripts": {
+					"$className": "Folder",
+					"$path": "src/scripts/client"
+				},
+				"client": {
+					"$className": "Folder",
+					"$path": "src/client"
+				}
+			}
+		}
+	}
+}
