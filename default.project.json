@@ -24,8 +24,8 @@
 			}
 		},
 
-		"PlayerScripts": {
-			"$className": "PlayerScripts",
+		"StarterPlayer": {
+			"$className": "StarterPlayer",
 			"StarterPlayerScripts": {
 				"$className": "StarterPlayerScripts",
 				"scripts": {
