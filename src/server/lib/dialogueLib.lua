@@ -1,0 +1,4 @@
+local DialogueLib = {}
+
+return DialogueLib
+
