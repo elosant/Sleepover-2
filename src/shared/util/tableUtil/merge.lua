@@ -1,4 +1,3 @@
-
 local function Merge(merger_tab, mergee_tab)
 	for field, value in pairs(merger_tab) do
 		if type(value) == "table" and type(mergee_tab[field]) == "table" then

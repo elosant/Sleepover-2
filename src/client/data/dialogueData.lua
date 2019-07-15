@@ -14,5 +14,13 @@ return {
 			LeftSpeakerFrame = UDim2.new(-0.5, 0, 0.5, 0),
 			RightSpeakerFrame = UDim2.new(1.5, 0, 0.5, 0)
 		}
+	},
+
+	commandToFunction = {
+		w = wait,
+		p = "ChangeSpeakerPriority",
+		n = "NewSpeaker",
+		q = "QuitSpeaker",
+--		s = "SwapSpeakers"
 	}
 }
