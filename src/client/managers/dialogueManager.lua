@@ -19,21 +19,6 @@ local networkLib = require(lib.networkLib)
 local DialogueManager = {}
 
 function DialogueManager.Init()
-	wait(5)
-	dialogueLib.ParseText(
-[[
-[nJohn,1]
-[nDude,2]
-John: Hello how are you?!
-Dude: Sup.
-[w2]
-[pJohn,3]
-John: Im less important now!
-[pDude,1]
-Dude: Haha pathetic!
-[qJohn]
-[qDude]
-]]	)
 end
 
 return DialogueManager

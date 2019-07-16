@@ -38,7 +38,7 @@ local function MoveSpeakerFrame(toOpen, speakerIndex)
 		toOpen and dialogueFramePositions.open or dialogueFramePositions.closed[speakerFrameName],
 		Enum.EasingDirection[toOpen and "Out" or "In"],
 		Enum.EasingStyle.Quint,
-		0.5,
+		1,
 		true
 	)
 end

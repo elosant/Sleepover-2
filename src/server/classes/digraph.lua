@@ -2,8 +2,8 @@
 local serverStorage = game:GetService("ServerStorage")
 
 local classes = serverStorage.server.classes
-local Graph = require(classes.Graph)
-local Edge = require(classes.Edge)
+local Graph = require(classes.graph)
+local Edge = require(classes.edge)
 
 local Digraph = setmetatable({}, Graph)
 Digraph.__index = Digraph
@@ -15,17 +15,12 @@ end
 
 function Digraph:addEdge(nodeA, nodeB, weight)
 	local edge = Edge.new(nodeA, nodeB, weight)
-	self.edges[#self.edges] = edge
+	self.edges[#self.edges+1] = edge
 
 	local nodeAAdjacencyList = self.adjacencyList[nodeA] or {}
 	self.adjacencyList[nodeA] = nodeAAdjacencyList
 
 	nodeAAdjacencyList[#nodeAAdjacencyList+1] = nodeB
-
-	local nodeBAdjacencyList = self.adjacencyList[nodeB] or {}
-	self.adjacencyList[nodeB] = nodeBAdjacencyList
-
-	nodeBAdjacencyList[#nodeBAdjacencyList+1] = nodeA
 end
 
 return Digraph

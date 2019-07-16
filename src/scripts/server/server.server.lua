@@ -9,5 +9,5 @@ for _, controller in pairs(controllers:GetChildren()) do
 end
 
 for _, manager in pairs(managers:GetChildren()) do
-	spawn(function() require(manager); end)
+	spawn(function() require(manager).init(); end)
 end
