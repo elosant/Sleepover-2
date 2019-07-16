@@ -5,18 +5,23 @@ local playersService = game:GetService("Players")
 -- Shared
 local shared = replicatedStorage:WaitForChild("shared")
 
-local tableUtil = shared.tableUtil
+local util = shared.util
+
+local tableUtil = util.tableUtil
 local getElementPosition = require(tableUtil.getElementPosition)
+
+local guiUtil = util.guiUtil
+local getTextSize = require(guiUtil.getTextSize)
 
 -- Player
 local player = playersService.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local playerScripts = player:WaitForChild("PlayerScripts")
 
-local client = playerScripts:WaitForChild("Client")
+local client = playerScripts:WaitForChild("client")
 
 local data = client.data
-local dialogueData = require(data.DialogueData)
+local dialogueData = require(data.dialogueData)
 
 local dialogueGui = playerGui:WaitForChild("DialogueGui")
 
@@ -25,7 +30,7 @@ DialogueLib.Speakers = {}
 local speakers = DialogueLib.Speakers
 
 local function MoveSpeakerFrame(toOpen, speakerIndex)
-	local speakerFrameName = dialogueData.dialogueSpeakerToFrame[speakerIndex]
+	local speakerFrameName = dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]
 	local speakerFrame = dialogueGui:FindFirstChild(speakerFrameName).InnerFrame
 	local dialogueFramePositions = dialogueData.dialogueFramePositions
 
@@ -33,20 +38,27 @@ local function MoveSpeakerFrame(toOpen, speakerIndex)
 		toOpen and dialogueFramePositions.open or dialogueFramePositions.closed[speakerFrameName],
 		Enum.EasingDirection[toOpen and "Out" or "In"],
 		Enum.EasingStyle.Quint,
-		0.3,
+		0.5,
 		true
 	)
 end
 
 local function EditSpeakerName(speakerName, speakerIndex)
-	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[speakerIndex]).InnerFrame
+	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]).InnerFrame
 	speakerFrame.SpeakerNameLabel.Text = speakerName
 end
 local function TypeText(speakerIndex, text)
-	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[speakerIndex]).InnerFrame
+	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]).InnerFrame
+
+	do
+		speakerFrame.SpeechTextLabel.Text = text
+		speakerFrame.SpeechTextLabel.TextSize = getTextSize(speakerFrame.SpeechTextLabel)
+		speakerFrame.SpeechTextLabel.TextScaled = false
+	end
 
 	for currentCharIndex = 1, string.len(text) do
-		speakerFrame.SpeechTextLabel = string.sub(text, 1, string.len(text))
+		speakerFrame.SpeechTextLabel.Text = string.sub(text, 1, currentCharIndex)
+		wait(dialogueData.typeCharacterDuration)
 	end
 end
 
@@ -56,7 +68,7 @@ local function EvaluateStageDirection(stageDirection)
 	local argStringList = string.sub(stageDirection, 2)
 	local argList = {}
 
-	for argument in string.gmatch(argStringList, ".,$") do
+	for argument in string.gmatch(argStringList, "%w+") do
 		argList[#argList+1] = argument
 	end
 
@@ -74,12 +86,12 @@ end
 function DialogueLib.ParseText(dialogueText)
 	local function IsCommand(word)
 		local wordLen = string.len(word)
-		return string.sub(word, 1, 1) == "[" and string.sub(word, wordLen, wordLen) == "]"
+		return (string.sub(word, 1, 1) == "[" and string.sub(word, wordLen, wordLen) == "]")
 	end
 
 	local lineArray = {}
 
-	for line in string.gmatch(dialogueText, ".*\n$") do
+	for line in string.gmatch(dialogueText, "(.-)\n") do
 		if line ~= "" then
 			lineArray[#lineArray+1] = line
 		end
@@ -90,15 +102,14 @@ function DialogueLib.ParseText(dialogueText)
 		local speaker
 
 		local wordCount = 0
-		for word in string.gmatch(line, ".%s$") do
+		for word in string.gmatch(line, "[%w%p]+") do
 			wordCount = wordCount + 1
 			local wordLen = string.len(word)
 
-			if wordLen > 2 and IsCommand(word) then
-				EvaluateStageDirection(string.sub(2, wordLen-1))
+			if IsCommand(word) then
+				EvaluateStageDirection(string.sub(word, 2, wordLen-1))
 			elseif wordCount == 1 then
-				speaker = string.match(word, ".:$")
-
+				speaker = string.match(word, "(.-):")
 			else
 				displayedString = displayedString .. word .. " "
 			end
@@ -112,17 +123,16 @@ function DialogueLib.ParseText(dialogueText)
 end
 
 function DialogueLib.NewSpeaker(speaker, speakerIndex)
-	EditSpeakerName(speaker, speakerIndex)
-	MoveSpeakerFrame(true, speakerIndex)
+	DialogueLib.ChangeSpeakerPriority(speaker, speakerIndex)
 end
 
 function DialogueLib.ChangeSpeakerPriority(speaker, newSpeakerIndex)
 	local speakerIndex = getElementPosition(speakers, speaker)
 
-	if speakerIndex then speakers[speakerIndex] = nil; end
-	speakers[newSpeakerIndex] = speaker
+	if speakerIndex then speakers[speakerIndex] = false; end
+	speakers[tonumber(newSpeakerIndex)] = speaker
 
-	MoveSpeakerFrame(false, speakerIndex)
+	if speakerIndex then MoveSpeakerFrame(false, speakerIndex); end
 	EditSpeakerName(speaker, newSpeakerIndex)
 	MoveSpeakerFrame(true, newSpeakerIndex)
 end
@@ -142,8 +152,9 @@ end
 
 function DialogueLib.QuitSpeaker(speaker)
 	local speakerIndex = getElementPosition(speakers, speaker)
-
 	MoveSpeakerFrame(false, speakerIndex)
+
+	speakers[speakerIndex] = false
 end
 
 return DialogueLib

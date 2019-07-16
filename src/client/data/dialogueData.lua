@@ -1,9 +1,9 @@
-
 return {
+	typeCharacterDuration = 1/20, -- How long it takes for a single character to be typed.
 	dialogueSpeakerToFrame = {
-		"CenterSpeakerFrame",
-		"LeftSpeakerFrame",
-		"RightSpeakerFrame"
+		[1] = "CenterSpeakerFrame",
+		[2] = "LeftSpeakerFrame",
+		[3] = "RightSpeakerFrame"
 	}, -- Speaker Index: Frame Name
 
 	dialogueFramePositions = {

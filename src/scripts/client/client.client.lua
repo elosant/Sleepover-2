@@ -5,9 +5,9 @@ local playersService = game:GetService("Players")
 local player = playersService.LocalPlayer
 local playerScripts = player:WaitForChild("PlayerScripts")
 
-local client = playerScripts:WaitForChild("Client")
+local client = playerScripts:WaitForChild("client")
 local managers = client.managers
 
-for _, manager in pairs(managers:GetChildren()) do
-	manager.Init()
+for _, managerModule in pairs(managers:GetChildren()) do
+	require(managerModule).Init()
 end
