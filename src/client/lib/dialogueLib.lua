@@ -1,9 +1,13 @@
 -- Services
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local playersService = game:GetService("Players")
+local tweenService = game:GetService("TweenService")
 
 -- Shared
 local shared = replicatedStorage:WaitForChild("shared")
+
+local sharedLib = shared.lib
+local signalLib = require(sharedLib.signalLib)
 
 local util = shared.util
 
@@ -34,13 +38,52 @@ local function MoveSpeakerFrame(toOpen, speakerIndex)
 	local speakerFrame = dialogueGui:FindFirstChild(speakerFrameName).InnerFrame
 	local dialogueFramePositions = dialogueData.dialogueFramePositions
 
-	speakerFrame:TweenPosition(
-		toOpen and dialogueFramePositions.open or dialogueFramePositions.closed[speakerFrameName],
-		Enum.EasingDirection[toOpen and "Out" or "In"],
-		Enum.EasingStyle.Quint,
-		1,
-		true
-	)
+	speakerFrame.ImageTransparency = toOpen and 1 or 0
+	speakerFrame.DropShadow.ImageTransparency = toOpen and 1 or 0.5
+	speakerFrame.SpeechTextLabel.TextTransparency = toOpen and 1 or 0
+	speakerFrame.SpeakerNameLabel.TextTransparency = toOpen and 1 or 0
+	speakerFrame.SpeakerImageLabel.ImageTransparency = toOpen and 1 or 0
+
+	tweenService:Create(
+		speakerFrame,
+		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			Position = toOpen and dialogueFramePositions.open or dialogueFramePositions.closed[speakerFrameName],
+			ImageTransparency = toOpen and 0 or 1
+		}
+	):Play()
+
+	tweenService:Create(
+		speakerFrame.DropShadow,
+		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			ImageTransparency = toOpen and 0.5 or 1
+		}
+	):Play()
+
+	tweenService:Create(
+		speakerFrame.SpeechTextLabel,
+		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			TextTransparency = toOpen and 0 or 1
+		}
+	):Play()
+
+	tweenService:Create(
+		speakerFrame.SpeakerNameLabel,
+		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			TextTransparency = toOpen and 0 or 1
+		}
+	):Play()
+
+	tweenService:Create(
+		speakerFrame.SpeakerImageLabel,
+		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			ImageTransparency = toOpen and 0 or 1
+		}
+	):Play()
 end
 
 local function EditSpeakerName(speakerName, speakerIndex)
@@ -137,18 +180,9 @@ function DialogueLib.ChangeSpeakerPriority(speaker, newSpeakerIndex)
 	MoveSpeakerFrame(true, newSpeakerIndex)
 end
 
---[[
---Serves no purpose as of now.
-function DialogueLib.SwapSpeakers(speakerA, speakerB)
-	local speakerAIndex, speakerBIndex = getElementPosition(speakers, speakerA), getElementPosition(speakers, speakerB)
-
-	speakers[speakerBIndex] = speakerA
-	speakers[speakerAIndex] = speakerB
-
-	-- Can't use MoveSpeakerFrame or EditSpeakerName since we'll be adding special effects when speakers are switched.
-
+function DialogueLib.FireEvent(eventName, ...)
+	signalLib.dispatchAsync("dialogueEvent", eventName, ...)
 end
---]]
 
 function DialogueLib.QuitSpeaker(speaker)
 	local speakerIndex = getElementPosition(speakers, speaker)

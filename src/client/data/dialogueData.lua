@@ -1,5 +1,5 @@
 return {
-	typeCharacterDuration = 1/20, -- How long it takes for a single character to be typed.
+	typeCharacterDuration = 1/30, -- How long it takes for a single character to be typed.
 	dialogueSpeakerToFrame = {
 		[1] = "CenterSpeakerFrame",
 		[2] = "LeftSpeakerFrame",
@@ -21,6 +21,7 @@ return {
 		p = "ChangeSpeakerPriority",
 		n = "NewSpeaker",
 		q = "QuitSpeaker",
+		e = "FireEvent"
 --		s = "SwapSpeakers"
 	}
 }

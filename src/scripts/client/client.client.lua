@@ -9,5 +9,5 @@ local client = playerScripts:WaitForChild("client")
 local managers = client.managers
 
 for _, managerModule in pairs(managers:GetChildren()) do
-	require(managerModule).Init()
+	require(managerModule).init()
 end

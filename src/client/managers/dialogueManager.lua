@@ -18,7 +18,10 @@ local networkLib = require(lib.networkLib)
 
 local DialogueManager = {}
 
-function DialogueManager.Init()
+function DialogueManager.init()
+	networkLib.listenToServer("dialogueContentSent", function(dialogueContent)
+		dialogueLib.ParseText(dialogueContent)
+	end)
 end
 
 return DialogueManager

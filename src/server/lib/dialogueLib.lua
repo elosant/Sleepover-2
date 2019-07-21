@@ -1,12 +1,20 @@
+--- Services
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local playersService = game:GetService("Players")
+
+local shared = replicatedStorage.shared
+
+local sharedLib = shared.lib
+local networkLib = require(sharedLib.networkLib)
+
 local DialogueLib = {}
 
-function DialogueLib.Speak()
-end
+function DialogueLib.ReplicateDialogueContent(dialogueContent, players)
+	local players = players or playersService:GetPlayers()
 
-function DialogueLib.AddSpeaker()
-end
-
-function DialogueLib.RemoveSpeaker()
+	for _, player in pairs(players) do
+		networkLib.fireToClient(player, "dialogueContentSent", dialogueContent)
+	end
 end
 
 return DialogueLib
