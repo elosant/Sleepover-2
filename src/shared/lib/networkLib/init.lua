@@ -1,4 +1,5 @@
 -- Services.
+local playersService = game:GetService("Players")
 local runService = game:GetService("RunService")
 
 -- Remote Instances.
@@ -157,6 +158,16 @@ function networkLib.fireToClient(Player, label, ...) -- Fired from server.
 	end
 
 	relayEvent:FireClient(Player, label, ...)
+end
+
+function networkLib.fireAllClients(label, ...)
+	-- Preconditions.
+	if not IsValidRequest(true, label) then
+		return
+	end
+	for _, Player in pairs(playersService:GetPlayers()) do
+		networkLib.fireToClient(Player, label, ...)
+	end
 end
 
 -- Relay subscriptions.
