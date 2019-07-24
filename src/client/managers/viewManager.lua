@@ -9,6 +9,10 @@ local player = playersService.LocalPlayer
 local playerScripts = player:WaitForChild("PlayerScripts")
 local playerGui = player:WaitForChild("PlayerGui")
 
+local client = playerScripts.client
+
+local view = client.view
+
 local ViewManager = {}
 
 function ViewManager.init()
