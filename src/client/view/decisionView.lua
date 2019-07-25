@@ -93,8 +93,23 @@ local function onMovedInOption(isEntered, optionFrame)
 	):Play()
 end
 
+-- Main
+for _, optionFrame in pairs(decisionFrame.OptionsFrame:GetChildren()) do
+	optionFrame.WrapperButton.MouseEnter:Connect(function()
+		onMovedInOption(true, optionFrame)
+	end)
+	optionFrame.WrapperButton.MouseLeave:Connect(function()
+		onMovedInOption(false, optionFrame)
+	end)
+	optionFrame.WrapperButton.MouseButton1Click:Connect(function()
+		onOptionClicked(optionFrame)
+	end)
+end
+
 -- Listeners
-signalLib.subscribeAsync("optionsGiven", function(question, options, timer)
+local DecisionView = {}
+
+function DecisionView.onOptionsGiven(question, options, timer)
 	chosenDecisionFrame = nil
 	local questionTextLabel = decisionFrame.QuestionTextLabel
 	local timerFrame = questionTextLabel.TimerFrame
@@ -131,21 +146,6 @@ signalLib.subscribeAsync("optionsGiven", function(question, options, timer)
 	end
 
 	decisionFrame:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quint, 0.5, true)
-end)
-
--- Main
-for _, optionFrame in pairs(decisionFrame.OptionsFrame:GetChildren()) do
-	optionFrame.WrapperButton.MouseEnter:Connect(function()
-		onMovedInOption(true, optionFrame)
-	end)
-	optionFrame.WrapperButton.MouseLeave:Connect(function()
-		onMovedInOption(false, optionFrame)
-	end)
-	optionFrame.WrapperButton.MouseButton1Click:Connect(function()
-		onOptionClicked(optionFrame)
-	end)
 end
 
-signalLib.dispatchAsync("optionsGiven", "Whats up?", {"Hey", "Not much", "Go away idiot"}, 5)
-
-return nil
+return DecisionView

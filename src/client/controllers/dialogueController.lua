@@ -3,7 +3,7 @@ local replicatedStorage = game:GetService("ReplicatedStorage")
 
 local shared = replicatedStorage:WaitForChild("shared")
 
-local sharedLib = shared.sharedLib
+local sharedLib = shared.lib
 local signalLib = require(sharedLib.signalLib)
 
 local dialogueEventListeners = {}
