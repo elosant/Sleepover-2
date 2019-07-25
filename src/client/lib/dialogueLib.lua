@@ -101,7 +101,9 @@ local function TypeText(speakerIndex, text)
 
 	for currentCharIndex = 1, string.len(text) do
 		speakerFrame.SpeechTextLabel.Text = string.sub(text, 1, currentCharIndex)
-		wait(dialogueData.typeCharacterDuration)
+		if string.sub(text, currentCharIndex, currentCharIndex) ~= " " then
+			wait(dialogueData.typeCharacterDuration)
+		end
 	end
 end
 
