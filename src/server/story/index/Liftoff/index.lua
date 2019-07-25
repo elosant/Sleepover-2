@@ -25,6 +25,7 @@ local shuttle = workspace.Shuttle
 local shuttleDockPart = workspace.ShuttleDockPoint
 
 return function()
+	wait(3) -- Prevent race conditions with network listener not being registered
 	-- Start intro for players
 	for _, player in pairs(playersService:GetPlayers()) do
 		networkLib.fireToClient(player, "startIntro")
@@ -33,7 +34,7 @@ return function()
 		networkLib.fireToClient(player, "startIntro")
 	end)
 
-	wait(18) -- temporary, should instead attempt to synchronise with all clients and use a larger max yield
+	wait(16) -- temporary, should instead attempt to synchronise with all clients and use a larger max yield
 
 	networkLib.fireAllClients("moveShuttle", shuttle, shuttleDockPart.Position)
 end

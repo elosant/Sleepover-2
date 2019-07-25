@@ -19,6 +19,7 @@ local shakeData = cameraData.shakeData
 
 local CameraLib = {}
 CameraLib.shakeOscillator = DampedSine.new(shakeData.initialAmplitude, shakeData.decayConstant, shakeData.angularFrequency)
+CameraLib.focusPart = nil
 
 local shakeOscillator = CameraLib.shakeOscillator
 local cameraBlur do
@@ -33,9 +34,21 @@ function CameraLib.shake(...)
 end
 
 function CameraLib.update()
-	local humanoid = player.Character:FindFirstChild("Humanoid")
+	-- Set focus if focusPart exists
+	if CameraLib.focusPart then
+		-- focusRestCFrame is the cframe camera is set to if focusing on part
+		CameraLib.focusRestCFrame = CFrame.new(
+			CameraLib.focusPart.Position + CameraLib.focusOffset,
+			CameraLib.focusPart.Position
+		)
+		camera.CFrame = CameraLib.focusRestCFrame
+	end
+
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:FindFirstChild("Humanoid")
 	if not humanoid then return end
 
+	-- Shake logic
 	shakeOscillator:update()
 	if shakeOscillator:getValue() < 1e-10 then
 		humanoid.CameraOffset = Vector3.new()
@@ -47,13 +60,30 @@ function CameraLib.update()
 		return shakeOscillator:getValue()*math.noise(math.random())
 	end
 
-	humanoid.CameraOffset = Vector3.new(
-		getOffsetComponent(),
-		getOffsetComponent(),
-		0
-	)
+	if not CameraLib.focusRestCFrame then
+		humanoid.CameraOffset = Vector3.new(
+			getOffsetComponent(),
+			getOffsetComponent(),
+			0
+		)
+	else
+		camera.CFrame = CameraLib.focusRestCFrame + Vector3.new(
+			getOffsetComponent(),
+			getOffsetComponent(),
+			0
+		)
+	end
 	cameraBlur.Size = shakeOscillator:getValue()*2.5
 end
+
+function CameraLib.setFocus(part, offset)
+	if part then
+		camera.CameraType = Enum.CameraType.Scriptable
+	end
+	CameraLib.focusPart = part
+	CameraLib.focusOffset = offset or Vector3.new(0, 0, 0)
+end
+
 runService:BindToRenderStep("CameraUpdate",  Enum.RenderPriority.First.Value, CameraLib.update)
 
 return CameraLib

@@ -7,7 +7,13 @@ local starterGui = game:GetService("StarterGui")
 
 -- Player
 local player = playersService.LocalPlayer
+
 local playerScripts = player:WaitForChild("PlayerScripts")
+local client = playerScripts.client
+
+local lib = client.lib
+local cameraLib = require(lib.cameraLib)
+
 local playerGui = player:WaitForChild("PlayerGui")
 local camera = workspace.CurrentCamera
 
@@ -104,7 +110,7 @@ function IntroView.onStartIntro()
 	wait(1)
 	TypeText(contextTextLabel.InstituteTextLabel, "You are a student at the Institute of Planetary Affairs")
 	wait(1)
-	TypeText(contextTextLabel.InstituteTextLabel.StationTextLabel, "You will be staying Overnight at the Solar Space Station")
+	TypeText(contextTextLabel.InstituteTextLabel.StationTextLabel, "You will be staying overnight at the Solar Space Station")
 
 	-- Fade out stuff
 	local fadeTweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
@@ -113,22 +119,25 @@ function IntroView.onStartIntro()
 	FadeObject(yearClippingFrame.YearText, fadeTweenInfo, fadeTweenOffset)
 	FadeObject(yearClippingFrame.YearText.MagnitudeText, fadeTweenInfo, fadeTweenOffset)
 	wait(0.7)
-	FadeObject(contextTextLabel, fadeTweenInfo, fadeTweenDuration)
+	FadeObject(contextTextLabel, fadeTweenInfo, fadeTweenOffset)
 	wait(0.7)
-	FadeObject(contextTextLabel.InstituteTextLabel, fadeTweenInfo, fadeTweenDuration)
+	FadeObject(contextTextLabel.InstituteTextLabel, fadeTweenInfo, fadeTweenOffset)
 	wait(0.7)
-	FadeObject(contextTextLabel.InstituteTextLabel.StationTextLabel, fadeTweenInfo, fadeTweenDuration)
+	FadeObject(contextTextLabel.InstituteTextLabel.StationTextLabel, fadeTweenInfo, fadeTweenOffset)
 	wait(1)
 	FadeObject(introFrame, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), UDim2.new())
 
 	-- Focus camera on shuttle
 	local cameraOriginPart = workspace.Shuttle.CameraOrigin
-	camera.CameraType = Enum.CameraType.Scriptable
-	camera.CFrame = cameraOriginPart.CFrame * CFrame.new(0, 15, 60)
 
+	-- Use cameraLib for compatability with shake
+	cameraLib.setFocus(cameraOriginPart, Vector3.new(0, -25, -60))
+
+	--[[
 	runService:BindToRenderStep("shipCameraLock", Enum.RenderPriority.Camera.Value, function()
 		camera.CFrame = CFrame.new(cameraOriginPart.Position + Vector3.new(0, 15, -60), cameraOriginPart.Position)
 	end)
+	--]]
 
 	-- Enable topbar
 	starterGui:SetCore("TopbarEnabled", true)
