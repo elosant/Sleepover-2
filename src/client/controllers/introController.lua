@@ -15,9 +15,14 @@ local shared = replicatedStorage.shared
 
 local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
+local signalLib = require(sharedLib.signalLib)
 
 networkLib.listenToServer("startIntro", function()
 	introView.onStartIntro()
+end)
+
+signalLib.subscribeAsync("introFinished", function()
+	signalLib.dispatchAsync("moveShuttle")
 end)
 
 return nil

@@ -110,6 +110,9 @@ function networkLib.listenToServer(label, func) -- Listener on client.
 		print("Appending listener", func, "on client to table field", label)
 	end
 	networkLib.Listeners[label][#networkLib.Listeners[label] + 1] = func
+
+	-- Fire an event to the server indicating the remote has been subscribed to
+	networkLib.fireToServer("networkEventRegistered", label)
 end
 
 function networkLib.listenToClient(label, func) -- Listener on server.

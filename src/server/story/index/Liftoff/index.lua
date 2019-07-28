@@ -2,39 +2,47 @@
 local serverStorage = game:GetService("ServerStorage")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local playersService = game:GetService("Players")
-local runService = game:GetService("RunService")
-local tweenService = game:GetService("TweenService")
 
 local server = serverStorage.server
 
 local lib = server.lib
 local dialogueLib = require(lib.dialogueLib)
+local replicationLib = require(lib.replicationLib)
 
 local shared = replicatedStorage.shared
 
 local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
+local signalLib = require(sharedLib.signalLib)
 
-local sharedUtil = shared.util
-local modelUtil = sharedUtil.modelUtil
-local moveModel = require(modelUtil.moveModel)
-
-local dialogue = script.Parent.dialogue
-
-local shuttle = workspace.Shuttle
-local shuttleDockPart = workspace.ShuttleDockPoint
+-- TODO: things to do/fire/sync
+-- wait for some arbitrary period to let players actually appear under Players (service)
+-- listen for (client-fired) waitingForIntro (synchronised)
+-- fire startIntro
+-- (moveShuttle will be done on client)
+-- listen for shuttleLanded (synchronised)
+-- place players in seats in high res shuttle
+-- do ramp/robot arm effects server side
+-- start The Tour
 
 return function()
-	wait(3) -- Prevent race conditions with network listener not being registered
-	-- Start intro for players
-	for _, player in pairs(playersService:GetPlayers()) do
-		networkLib.fireToClient(player, "startIntro")
-	end
-	playersService.PlayerAdded:Connect(function(player)
-		networkLib.fireToClient(player, "startIntro")
+	-- Start intro for players after players have subscribed and are synchronised
+	signalLib.subscribeAsync("clientRequestsSynced", function(label)
+		print(label)
+		if label == "waitingForIntro" then
+			networkLib.fireAllClients("startIntro")
+		end
 	end)
 
-	wait(16) -- temporary, should instead attempt to synchronise with all clients and use a larger max yield
+	replicationLib.listenSyncClientRequests(
+		"waitingForIntro",
+		--[[#playersService:GetPlayers() > 0 and #playersService:GetPlayers() or--]] 10,
+		15
+	)
 
-	networkLib.fireAllClients("moveShuttle", shuttle, shuttleDockPart.Position)
+	networkLib.listenToClient("waitingForIntro", function(player)
+		replicationLib.registerClientToSyncedRequests("waitingForIntro", player)
+	end)
+
+--	networkLib.fireAllClients("moveShuttle", shuttle, shuttleDockPart.Position)
 end
