@@ -104,15 +104,14 @@ function networkLib.listenToServer(label, func) -- Listener on client.
 
 	if type(networkLib.Listeners[label]) ~= "table" then
 		networkLib.Listeners[label] = {}
+		-- Fire an event to the server indicating the remote has been subscribed to
+		networkLib.fireToServer("networkEventRegistered", label)
 	end
 
 	if verbose then
 		print("Appending listener", func, "on client to table field", label)
 	end
 	networkLib.Listeners[label][#networkLib.Listeners[label] + 1] = func
-
-	-- Fire an event to the server indicating the remote has been subscribed to
-	networkLib.fireToServer("networkEventRegistered", label)
 end
 
 function networkLib.listenToClient(label, func) -- Listener on server.
@@ -184,7 +183,8 @@ local function subscribeToRemoteInstances(isServer)
 			end
 
 			for _, listenerFunc in pairs(networkLib.Listeners[label]) do
-				listenerFunc(Player, ...)
+				local paramList = {...}
+				spawn(function() listenerFunc(Player, unpack(paramList)); end)
 			end
 		end)
 
@@ -205,7 +205,8 @@ local function subscribeToRemoteInstances(isServer)
 			end
 
 			for _, listenerFunc in pairs(networkLib.Listeners[label]) do
-				listenerFunc(...)
+				local paramList = {...}
+				spawn(function() listenerFunc(unpack(paramList)); end)
 			end
 		end)
 
