@@ -17,9 +17,11 @@ local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
-networkLib.listenToServer("startIntro", function()
-	introView.onStartIntro()
-end)
+-- Listener to network label startIntro is now held in introController to mitigate race conditions,
+-- instead signalLib will be used to indicate the introController to start introView, which will
+-- be dispatched by loadingController.
+--networkLib.listenToServer("startIntro", introView.onStartIntro)
+signalLib.subscribeAsync("loadingFinished", introView.onStartIntro)
 
 signalLib.subscribeAsync("introFinished", function()
 	signalLib.dispatchAsync("moveShuttle")

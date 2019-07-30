@@ -1,0 +1,3 @@
+local ShopView = {}
+
+return ShopView

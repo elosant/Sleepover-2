@@ -106,7 +106,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 	local shuttleLaunchSound = playAmbientSound(assetPool.Sound.ShuttleLaunch)
 	wait(2)
 
-	local movementTween = MoveShuttle(shuttle, target, 10)
+	local movementTween = MoveShuttle(shuttle, target, 30)
 
 	-- Play sounds until reached
 	local targetReached do
@@ -125,8 +125,8 @@ signalLib.subscribeAsync("moveShuttle", function()
 		movementTween.Completed:Connect(function()
 			targetReached = true
 
-			fadeOutSound(highAltitudeWindSound, 2)
-			fadeOutSound(rocketRoarSound, 2)
+			fadeOutSound(highAltitudeWindSound, 0.5)
+			fadeOutSound(rocketRoarSound, 0.5)
 		end)
 	end
 
@@ -174,11 +174,12 @@ signalLib.subscribeAsync("moveShuttle", function()
 	TargetShuttle(shuttle, target, 4, -90, 90, 4)
 
 	-- Fade out shuttle launch sound which is just a faint roar at this point.
-	fadeOutSound(shuttleLaunchSound, 2)
+	fadeOutSound(shuttleLaunchSound, 1)
 
 	shuttle.LeftThruster.PrimaryPart.ParticleEmitter.Enabled = false
 	shuttle.RightThruster.PrimaryPart.ParticleEmitter.Enabled = false
 
+	print("hey")
 	networkLib.fireToServer("shuttleLanded")
 end)
 

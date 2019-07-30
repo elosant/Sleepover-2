@@ -6,6 +6,7 @@ local shared = replicatedStorage.shared
 
 local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
+local signalLib = require(sharedLib.signalLib)
 
 local sharedData = shared.data
 local assetPool = require(sharedData.assetPool)
@@ -20,7 +21,18 @@ local instanceToPropertyMap = {
 function LoadingManager.init()
 	local instanceArray = {}
 
+	signalLib.dispatchAsync("startLoadingView")
+
+	local preloadFinished
 	-- Show progress in loadingView
+	spawn(function()
+		while not preloadFinished do
+			signalLib.dispatchAsync("showAssetsLeft", contentProvider.RequestQueueSize)
+			wait()
+		end
+		signalLib.dispatchAsync("preloadFinished")
+	end)
+
 	for instanceType, idArray in pairs(assetPool) do
 		for _, id in pairs(idArray) do
 			local instance = Instance.new(instanceType)
@@ -34,6 +46,8 @@ function LoadingManager.init()
 	if not success then
 		warn("CONTENT_LOAD_ERROR:", err)
 	end
+
+	preloadFinished = true
 
 	for _, instance in pairs(instanceArray) do
 		instance:Destroy()

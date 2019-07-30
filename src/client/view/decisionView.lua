@@ -16,8 +16,8 @@ local shared = replicatedStorage.shared
 local sharedLib = shared.lib
 local signalLib = require(sharedLib.signalLib)
 
-local activeAccentColor = Color3.fromRGB(113, 194, 255)
-local inactiveAccentColor = Color3.fromRGB(89, 94, 118)
+local activeAccentColor = Color3.fromRGB(136, 192, 208)
+local inactiveAccentColor = Color3.fromRGB(216, 222, 233)
 
 local chosenDecisionFrame
 

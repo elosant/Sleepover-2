@@ -4,6 +4,7 @@ signalLib.signals = {}
 signalLib.signals.async = {}
 signalLib.signals.sync = {}
 signalLib.threads = {}
+signalLib.paused = {} -- Entries will be set to true and subsequently cleared after an event has been asynchronously dispatched, for yielding calling threads.
 
 -- Dispatches callback(s) in signalLib.signals[label] asynchronously, multiple callbacks are allowed.
 function signalLib.dispatchAsync(label, ...)
@@ -13,6 +14,13 @@ function signalLib.dispatchAsync(label, ...)
 	for _, signalCallback in pairs(signalLib.signals.async[label]) do
 		local callbackCoroutine = coroutine.create(signalCallback)
 		coroutine.resume(callbackCoroutine, ...)
+	end
+
+	local pausedLabelArray = signalLib.paused[label]
+	if not pausedLabelArray then return end
+
+	for index = 1, #pausedLabelArray do
+		pausedLabelArray[index] = true
 	end
 end
 
@@ -36,6 +44,19 @@ end
 -- Dispatches signal synchronously, yields until callback exits. Maximum of one callback allowed.
 function signalLib.subscribe(label, callback)
 	signalLib.signals.sync[label] = callback
+end
+
+function signalLib.wait(label)
+	local pausedLabelArray = signalLib.paused[label] or {}
+	signalLib.paused[label] = pausedLabelArray
+
+	local index = #pausedLabelArray+1
+	pausedLabelArray[index] = false
+
+	while not pausedLabelArray[index] do
+		wait()
+	end
+	table.remove(pausedLabelArray, index)
 end
 
 function signalLib.disconnectAsync(label, callback) -- Must be the same callback function (point to the same object).

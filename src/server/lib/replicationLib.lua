@@ -8,6 +8,10 @@ local shared = replicatedStorage.shared
 local sharedLib = shared.lib
 local signalLib = require(sharedLib.signalLib)
 
+local sharedUtil = shared.util
+local tableUtil = sharedUtil.tableUtil
+local getElementPosition = require(tableUtil.getElementPosition)
+
 local ReplicationLib = {}
 ReplicationLib.labelToDataMap = {}
 
@@ -23,7 +27,6 @@ local function updateRegisteredClients(registeredClients)
 end
 
 local function onClientRequestsSynchronised(label)
-	print(label)
 	ReplicationLib.labelToDataMap[label] = nil
 	signalLib.dispatchAsync("clientRequestsSynced", label)
 end
@@ -49,7 +52,6 @@ function ReplicationLib.listenSyncClientRequests(label, minPlayers, maxYield)
 				#registeredClients >= labelData.minPlayers
 				or tick() - labelData.syncListenStarted >= labelData.maxYield
 			then
-				print(label)
 				onClientRequestsSynchronised(label)
 				break
 			end
@@ -57,13 +59,20 @@ function ReplicationLib.listenSyncClientRequests(label, minPlayers, maxYield)
 	end)
 end
 
-function ReplicationLib.registerClientToSyncedRequests(label, player)
+function ReplicationLib.registerClientToSyncedRequests(player, label)
+	table.foreach(ReplicationLib.labelToDataMap, print)
+	print(player, label)
+
 	local labelData = ReplicationLib.labelToDataMap[label]
+	if not labelData then warn("No data for", label); return end
+
 	local registeredClients = labelData.registeredClients
 
 	updateRegisteredClients(registeredClients)
-	registeredClients[#registeredClients+1] = player
-	print(label, player)
+
+	if not getElementPosition(registeredClients, player) then
+		registeredClients[#registeredClients+1] = player
+	end
 end
 
 return ReplicationLib
