@@ -8,7 +8,7 @@ local lightingService = game:GetService("Lighting")
 
 -- Player
 local player = playersService.LocalPlayer
-local playerScripts = player:WaitForChild("PlayerScripts")
+local playerScripts = player.PlayerScripts
 local client = playerScripts.client
 
 local lib = client.lib

@@ -5,11 +5,11 @@ local tweenService = game:GetService("TweenService")
 
 -- Player
 local player = playersService.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local playerScripts = player:WaitForChild("PlayerScripts")
+local playerGui = player.PlayerGui
+local playerScripts = player.PlayerScripts
 
 local loadingGui = playerGui:WaitForChild("LoadingGui")
-local loadingFrame = loadingGui:WaitForChild("LoadingFrame")
+local loadingFrame = loadingGui.LoadingFrame
 
 local rocketImageLabel = loadingFrame.RocketImageLabel
 local loadingTextLabel = rocketImageLabel.LoadingTextLabel

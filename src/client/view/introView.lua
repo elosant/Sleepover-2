@@ -8,13 +8,13 @@ local starterGui = game:GetService("StarterGui")
 -- Player
 local player = playersService.LocalPlayer
 
-local playerScripts = player:WaitForChild("PlayerScripts")
+local playerScripts = player.PlayerScripts
 local client = playerScripts.client
 
 local lib = client.lib
 local cameraLib = require(lib.cameraLib)
 
-local playerGui = player:WaitForChild("PlayerGui")
+local playerGui = player.PlayerGui
 local camera = workspace.CurrentCamera
 
 local introGui = playerGui:WaitForChild("IntroGui")

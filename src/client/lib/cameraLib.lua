@@ -6,7 +6,7 @@ local playersService = game:GetService("Players")
 local player = playersService.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local playerScripts = player:WaitForChild("PlayerScripts")
+local playerScripts = player.PlayerScripts
 local client = playerScripts.client
 
 local classes = client.classes

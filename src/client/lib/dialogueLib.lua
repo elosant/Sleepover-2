@@ -4,7 +4,7 @@ local playersService = game:GetService("Players")
 local tweenService = game:GetService("TweenService")
 
 -- Shared
-local shared = replicatedStorage:WaitForChild("shared")
+local shared = replicatedStorage.shared
 
 local sharedLib = shared.lib
 local signalLib = require(sharedLib.signalLib)
@@ -19,10 +19,10 @@ local getTextSize = require(guiUtil.getTextSize)
 
 -- Player
 local player = playersService.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local playerScripts = player:WaitForChild("PlayerScripts")
+local playerGui = player.PlayerGui
+local playerScripts = player.PlayerScripts
 
-local client = playerScripts:WaitForChild("client")
+local client = playerScripts.client
 
 local data = client.data
 local dialogueData = require(data.dialogueData)

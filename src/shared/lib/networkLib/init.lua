@@ -3,8 +3,8 @@ local playersService = game:GetService("Players")
 local runService = game:GetService("RunService")
 
 -- Remote Instances.
-local relayFunction = script:WaitForChild("RelayFunction")
-local relayEvent = script:WaitForChild("RelayEvent")
+local relayFunction = script.RelayFunction
+local relayEvent = script.RelayEvent
 
 -- Private Functions.
 local function IsValidRequest(machineTypeIsServer, label)

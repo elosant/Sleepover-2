@@ -3,9 +3,9 @@ local playersService = game:GetService("Players")
 
 -- Player
 local player = playersService.LocalPlayer
-local playerScripts = player:WaitForChild("PlayerScripts")
+local playerScripts = player.PlayerScripts
 
-local client = playerScripts:WaitForChild("client")
+local client = playerScripts.client
 local managers = client.managers
 local controllers = client.controllers
 local story = client.story

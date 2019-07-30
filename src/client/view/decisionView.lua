@@ -6,7 +6,7 @@ local runService = game:GetService("RunService")
 
 -- Player
 local player = playersService.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local playerGui = player.PlayerGui
 
 local decisionGui = playerGui:WaitForChild("DecisionGui")
 local decisionFrame = decisionGui.DecisionFrame.InnerFrame
