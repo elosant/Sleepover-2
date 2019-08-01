@@ -9,7 +9,10 @@ signalLib.paused = {} -- Entries will be set to true and subsequently cleared af
 -- Dispatches callback(s) in signalLib.signals[label] asynchronously, multiple callbacks are allowed.
 function signalLib.dispatchAsync(label, ...)
 	-- Preconditions.
-	if not signalLib.signals.async[label] then warn("Label is not subscribed to."); return end
+	if not signalLib.signals.async[label] then
+		warn(string.format("Label %s is not subscribed to.", label));
+		return
+	end
 
 	for _, signalCallback in pairs(signalLib.signals.async[label]) do
 		local callbackCoroutine = coroutine.create(signalCallback)
@@ -28,6 +31,16 @@ end
 function signalLib.subscribeAsync(label, callback)
 	-- Preconditions.
 	if not signalLib.signals.async[label] then signalLib.signals.async[label] = {}; end
+
+
+	-- Allows for subscription to multiple labels with the same callback.
+	if type(label) == "table" then
+		for _, innerLabel in pairs(label) do
+			local signalCollection = signalLib.signals.async[innerLabel]
+			signalCollection[#signalCollection + 1] = callback
+		end
+		return
+	end
 
 	local signalCollection = signalLib.signals.async[label]
 	signalCollection[#signalCollection + 1] = callback

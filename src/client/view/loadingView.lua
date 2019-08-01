@@ -29,11 +29,11 @@ local incompleteTextColor = Color3.fromRGB(191, 97, 106)
 local completeTextColor = Color3.fromRGB(136, 192, 208)
 
 local loadingView = {}
-
 local maxAssetCount = 0
 
+loadingGui.Enabled = true
+
 function loadingView.onStartLoadingView()
-	loadingGui.Enabled = true
 	loadingTextLabel.Text = "Starting loading processes..."
 end
 

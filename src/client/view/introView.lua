@@ -62,7 +62,7 @@ local function TypeText(textObject, text)
 
 		if string.sub(text, charIndex, charIndex) ~= " " then
 			wait(typeRate)
-			playAmbientSound(assetPool.Sound.TypeSound, { PlaybackSpeed = 2 })
+			playAmbientSound(assetPool.Sound.TypeSound, { PlaybackSpeed = 3 })
 		end
 	end
 	cursor.Visible = false
@@ -135,7 +135,7 @@ function IntroView.onStartIntro()
 	wait(1)
 
 	playAmbientSound(assetPool.Sound.GoForDeploy) -- Nasa suplementary ambient sound
-	TypeText(contextTextLabel.InstituteTextLabel.StationTextLabel, "You will be staying overnight at the Solar Space Station")
+	TypeText(contextTextLabel.InstituteTextLabel.StationTextLabel, "You will be staying overnight at the Nexus Space Station")
 
 	wait(1.5)
 	playAmbientSound(assetPool.Sound.DoYouRead)
