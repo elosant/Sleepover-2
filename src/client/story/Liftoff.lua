@@ -179,7 +179,6 @@ signalLib.subscribeAsync("moveShuttle", function()
 	shuttle.LeftThruster.PrimaryPart.ParticleEmitter.Enabled = false
 	shuttle.RightThruster.PrimaryPart.ParticleEmitter.Enabled = false
 
-	print("hey")
 	networkLib.fireToServer("shuttleLanded")
 end)
 
