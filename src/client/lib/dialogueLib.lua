@@ -103,8 +103,7 @@ local function TypeText(speakerIndex, text)
 	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]).InnerFrame
 
 	do
-		speakerFrame.SpeechTextLabel.Text = text
-		speakerFrame.SpeechTextLabel.TextSize = getTextSize(speakerFrame.SpeechTextLabel)
+		speakerFrame.SpeechTextLabel.TextSize = getTextSize(speakerFrame.SpeechTextLabel, text)
 		speakerFrame.SpeechTextLabel.TextScaled = false
 	end
 

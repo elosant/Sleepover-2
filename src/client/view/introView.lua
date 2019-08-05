@@ -162,7 +162,8 @@ function IntroView.onStartIntro()
 	local cameraOriginPart = workspace.Shuttle.CameraOrigin
 
 	-- Use cameraLib for compatability with shake
-	cameraLib.setFocus(cameraOriginPart, Vector3.new(0, -25, -60))
+	camera.FieldOfView = 60
+	cameraLib.setFocus(cameraOriginPart, Vector3.new(95, 35, -130))
 
 	-- Enable topbar
 	starterGui:SetCore("TopbarEnabled", true)

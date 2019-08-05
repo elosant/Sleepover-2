@@ -56,4 +56,13 @@ function ShopView.toggle(isOpen)
 	end
 end
 
+function ShopView.onPromptPurchase()
+end
+
+function ShopView.onSelectItem()
+end
+
+function ShopView.onSelectCategory()
+end
+
 return ShopView

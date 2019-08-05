@@ -1,5 +1,8 @@
 return function(soundId, soundData, keepOnEnd, isYield, endedCallback, soundGroupName)
 	if not soundGroupName then soundGroupName = "Ambient"; end
+	if type(soundId) == "number" or string.sub(soundId, 1, 13) ~= "rbxassetid://" then
+		soundId = "rbxassetid://" .. tostring(soundId)
+	end
 
 	local soundGroup = game:GetService("SoundService"):FindFirstChild(soundGroupName)
 	if not soundGroup then

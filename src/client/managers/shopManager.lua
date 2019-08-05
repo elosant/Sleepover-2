@@ -24,9 +24,20 @@ function ShopManager.init()
 
 end
 
+-- Members are called from shopController
 function ShopManager.toggle()
 	isOpen = not isOpen
 	shopView.toggle(isOpen)
 end
 
+function ShopManager.promptPurchase()
+end
+
+function ShopManager.selectItem()
+end
+
+function ShopManager.selectCategory()
+end
+
 return ShopManager
+

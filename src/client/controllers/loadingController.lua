@@ -21,7 +21,10 @@ local networkLib = require(sharedLib.networkLib)
 -- Outbound (from manager)
 signalLib.subscribeAsync("startLoadingView", loadingView.onStartLoadingView)
 signalLib.subscribeAsync("showAssetsLeft", loadingView.showAssetsLeft)
-signalLib.subscribeAsync("preloadFinished", loadingView.onPreloadFinished)
+signalLib.subscribeAsync("preloadFinished", function()
+	loadingView.onPreloadFinished()
+	networkLib.fireToServer("waitingForIntro") -- Sync with server
+end)
 
 -- Inbound
 networkLib.listenToServer("startIntro", loadingView.onSynced)

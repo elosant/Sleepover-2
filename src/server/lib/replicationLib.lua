@@ -34,7 +34,8 @@ end
 -- Fired when server needs to listen for some client fired event across all players,
 -- this function will dispatch a signal notifying (the calling function) that either
 -- all the players have successfully broadcasted said request, the number of synchronised
--- players has reached "maxPlayers" or the passed "maxYield" time has elapsed.
+-- players has reached "maxPlayers" or the passed "maxYield" time has elapsed. Atleast one
+-- player must be registered.
 function ReplicationLib.listenSyncClientRequests(label, minPlayers, maxYield)
 	ReplicationLib.labelToDataMap[label] = {
 		syncListenStarted = tick(),
@@ -48,10 +49,24 @@ function ReplicationLib.listenSyncClientRequests(label, minPlayers, maxYield)
 		local registeredClients = labelData.registeredClients
 		while true do
 			wait(0.1)
-			if
-				#registeredClients >= labelData.minPlayers
-				or tick() - labelData.syncListenStarted >= labelData.maxYield
-			then
+
+			-- Using duplicate branches so its possible to track which condition passed
+			local isSynced
+
+			if #registeredClients > 0 then
+				if labelData.minPlayers and #registeredClients >= labelData.minPlayers then
+					print("min players reached")
+					isSynced = true
+				elseif not labelData.minPlayers and #registeredClients >= #playersService:GetPlayers() then
+					print("registered clients reached player count", #playersService:GetPlayers())
+					isSynced = true
+				elseif tick() - labelData.syncListenStarted >= labelData.maxYield then
+					print("elapsed time exceeded maxYield")
+					isSynced = true
+				end
+			end
+
+			if isSynced then
 				onClientRequestsSynchronised(label)
 				break
 			end
@@ -60,9 +75,6 @@ function ReplicationLib.listenSyncClientRequests(label, minPlayers, maxYield)
 end
 
 function ReplicationLib.registerClientToSyncedRequests(player, label)
-	table.foreach(ReplicationLib.labelToDataMap, print)
-	print(player, label)
-
 	local labelData = ReplicationLib.labelToDataMap[label]
 	if not labelData then warn("No data for", label); return end
 
@@ -70,6 +82,7 @@ function ReplicationLib.registerClientToSyncedRequests(player, label)
 
 	updateRegisteredClients(registeredClients)
 
+	-- Prevent duplicate registration
 	if not getElementPosition(registeredClients, player) then
 		registeredClients[#registeredClients+1] = player
 	end

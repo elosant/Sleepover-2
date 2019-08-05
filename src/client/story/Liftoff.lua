@@ -9,6 +9,8 @@ local lightingService = game:GetService("Lighting")
 -- Player
 local player = playersService.LocalPlayer
 local playerScripts = player.PlayerScripts
+local camera = workspace.CurrentCamera
+
 local client = playerScripts.client
 
 local lib = client.lib
@@ -20,9 +22,13 @@ local sharedData = shared.data
 local assetPool = require(sharedData.assetPool)
 
 local sharedUtil = shared.util
+
 local audioUtil = sharedUtil.audioUtil
 local playAmbientSound = require(audioUtil.playAmbientSound)
 local fadeOutSound = require(audioUtil.fadeOutSound)
+
+local guiUtil = sharedUtil.guiUtil
+local fadeObject = require(guiUtil.fadeObject)
 
 local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
@@ -41,6 +47,10 @@ local function MoveShuttle(shuttle, target, travelTime)
 
 	local steppedConnection
 	steppedConnection = runService.Heartbeat:Connect(function()
+		if not shuttle or not shuttle.PrimaryPart then
+			steppedConnection:Disconnect()
+			return
+		end
 		shuttle:SetPrimaryPartCFrame(movementCFrameValue.Value)
 	end)
 
@@ -92,6 +102,9 @@ signalLib.subscribeAsync("moveShuttle", function()
 	local dockPoints = workspace.DockPoints
 	local target = dockPoints.A.Position
 
+	wait(1.5)
+	signalLib.dispatchAsync("newChapter", "Liftoff")
+
 	playAmbientSound(assetPool.Sound.CountdownTenMale)
 
 	-- Preferably replicate thruster data to client, lack of synchroninity needn't matter.
@@ -116,7 +129,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 		-- Shake until reached target
 		spawn(function()
 			while not targetReached do
-				cameraLib.shake(math.random(5,8), math.random(1,2.5), math.random(1,2))
+				cameraLib.shake(math.random(5.5,9), math.random(1,2.5), math.random(1,2))
 				playAmbientSound(assetPool.Sound.RattleSound, { PlaybackSpeed = 5 })
 				wait(math.random(2.5, 6))
 			end
@@ -180,6 +193,55 @@ signalLib.subscribeAsync("moveShuttle", function()
 	shuttle.RightThruster.PrimaryPart.ParticleEmitter.Enabled = false
 
 	networkLib.fireToServer("shuttleLanded")
+
+	-- Do authentication gui fade in (gui to allow other players to sync)
+	local synced
+	signalLib.dispatchAsync("showTransition", nil, "Authenticating", function(transitionFrame)
+		local transitionTextLabel = transitionFrame.TransitionTextLabel
+
+		local transitionTextColors = {
+			Color3.fromRGB(191, 97, 106),
+			Color3.fromRGB(180, 142, 173),
+			Color3.fromRGB(208, 135, 112)
+		}
+		local colorIndex = 0
+
+		while not synced do
+			wait(1.5)
+			colorIndex = colorIndex + 1
+			if colorIndex > #transitionTextColors then
+				colorIndex = 1
+			end
+
+			tweenService:Create(
+				transitionTextLabel,
+				TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+				{ TextColor3 = transitionTextColors[colorIndex] }
+			):Play()
+		end
+
+		transitionTextLabel.Text = "Authenticated"
+
+		wait(2)
+		local fadeTweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		fadeObject(true, transitionFrame, fadeTweenInfo)
+		fadeObject(true, transitionTextLabel, fadeTweenInfo)
+
+		wait(fadeTweenInfo.Time)
+		transitionTextLabel.TextTransparency = 1
+	end)
+
+	networkLib.listenToServer("shuttleLandedSynced", function()
+		wait(6)
+		synced = true
+	end)
+
+	shuttle:Destroy()
+
+	wait(0.5)
+	cameraLib.setFocus()
+	camera.CameraType = Enum.CameraType.Custom
+	camera.FieldOfView = 70
 end)
 
 return nil

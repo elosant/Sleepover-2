@@ -34,12 +34,14 @@ function LoadingManager.init()
 	end)
 
 	for instanceType, idArray in pairs(assetPool) do
-		for _, id in pairs(idArray) do
-			local instance = Instance.new(instanceType)
-			local property = instanceToPropertyMap[instanceType]
-			instance[property] = id
+		local property = instanceToPropertyMap[instanceType]
+		if property then
+			for _, id in pairs(idArray) do
+				local instance = Instance.new(instanceType)
+				instance[property] = "rbxassetid://" .. tostring(id)
 
-			instanceArray[#instanceArray+1] = instance
+				instanceArray[#instanceArray+1] = instance
+			end
 		end
 	end
 	local success, err = pcall(contentProvider.PreloadAsync, contentProvider, { unpack(instanceArray), game })
@@ -52,9 +54,6 @@ function LoadingManager.init()
 	for _, instance in pairs(instanceArray) do
 		instance:Destroy()
 	end
-
-	-- Sync with server
-	networkLib.fireToServer("waitingForIntro")
 end
 
 return LoadingManager
