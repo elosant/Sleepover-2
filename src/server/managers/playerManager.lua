@@ -4,8 +4,15 @@ local playersService = game:GetService("Players")
 
 local PlayerManager = {}
 
+local function onCharacterAdded(character)
+	wait()
+	local healthScript = character:WaitForChild("Health")
+	healthScript:Destroy()
+end
+
 local function onPlayerAdded(player)
-	player:LoadCharacter()
+--	player:LoadCharacter()
+	player.CharacterAdded:Connect(onCharacterAdded)
 end
 
 function PlayerManager.init()

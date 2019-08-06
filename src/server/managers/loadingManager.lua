@@ -64,6 +64,9 @@ function LoadingManager.init()
 			-- Init story manager from here (is excluded from index server script)
 			spawn(function() require(managers.storyManager).init(); end)
 
+			-- Disable auto respawn
+			playersService.CharacterAutoLoads = false
+
 			-- Teleport any players back to lobby from this point onwards.
 			playersService.PlayerAdded:Connect(function(player)
 				local lobbyPlaceId = 1 -- Arbitrary, change on release

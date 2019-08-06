@@ -46,7 +46,7 @@ IntroView.hasStarted = false
 local cursor
 
 local function TypeText(textObject, text)
-	local typeRate = 1/12
+	local typeRate = 1/30--1/12
 
 	cursor.Parent = textObject
 	cursor.Visible = true
@@ -140,7 +140,7 @@ function IntroView.onStartIntro()
 	wait(1.5)
 	playAmbientSound(assetPool.Sound.DoYouRead)
 
-	wait(3)
+--	wait(3)
 
 	-- Fade out stuff
 	local fadeTweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)

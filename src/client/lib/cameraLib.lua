@@ -60,7 +60,7 @@ function CameraLib.update()
 		return shakeOscillator:getValue()*math.noise(math.random())
 	end
 
-	if not CameraLib.focusRestCFrame then
+	if not CameraLib.focusPart then
 		humanoid.CameraOffset = Vector3.new(
 			getOffsetComponent(),
 			getOffsetComponent(),

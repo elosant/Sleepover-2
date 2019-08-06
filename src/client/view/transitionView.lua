@@ -93,8 +93,8 @@ function TransitionView.onNewChapter(chapterName)
 	fadeObject(
 		true,
 		chapterLabel.DropShadow,
-		TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		UDim2.new(0, 0, 0.1, 0)
+		TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)--,
+		--UDim2.new(0, 0, 0.1, 0)
 	)
 
 end

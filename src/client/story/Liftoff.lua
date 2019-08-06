@@ -32,7 +32,7 @@ local fadeObject = require(guiUtil.fadeObject)
 
 local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
-local signalLib =  require(sharedLib.signalLib)
+local signalLib = require(sharedLib.signalLib)
 
 local function MoveShuttle(shuttle, target, travelTime)
 	local movementCFrameValue = Instance.new("CFrameValue")
@@ -96,11 +96,14 @@ local function RotateThruster(thruster, rotation, time)
 	return rotationTween
 end
 
+
 -- Invoked in introController
 signalLib.subscribeAsync("moveShuttle", function()
 	local shuttle = workspace.Shuttle
+	local station = workspace.Station
 	local dockPoints = workspace.DockPoints
 	local target = dockPoints.A.Position
+	local activeColor = Color3.fromRGB(13, 105, 172) -- Bright blue brick color
 
 	wait(1.5)
 	signalLib.dispatchAsync("newChapter", "Liftoff")
@@ -119,7 +122,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 	local shuttleLaunchSound = playAmbientSound(assetPool.Sound.ShuttleLaunch)
 	wait(2)
 
-	local movementTween = MoveShuttle(shuttle, target, 30)
+	local movementTween = MoveShuttle(shuttle, target, 1)--30)
 
 	-- Play sounds until reached
 	local targetReached do
@@ -164,7 +167,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 
 	-- Wait until (first) target reached
 	movementTween.Completed:Wait()
-	wait(2) -- Give time for other callbacks to get invoked
+	wait(1)
 	movementTween:Destroy()
 
 	-- Calls MoveShuttle and RotateThruster and yields
@@ -177,14 +180,27 @@ signalLib.subscribeAsync("moveShuttle", function()
 		wait(movementTime)
 	end
 
+	-- Recolor the forcefield and surrounding neon parts
+	local doorRecolorParts = station.recolor:GetChildren()
+	doorRecolorParts[#doorRecolorParts+1] = station.forcefieldLayer
+
+	for _, part in pairs(doorRecolorParts) do
+		tweenService:Create(
+			part,
+			TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{ Color = activeColor }
+		):Play()
+	end
+
 	-- Move inside and above the landing pad
 	target = dockPoints.B.Position
-	TargetShuttle(shuttle, target, 7, 0, 0, 4)
+	TargetShuttle(shuttle, target, 2, 0, 0, 2)
+
 	wait(0.5)
 
 	-- Move down onto the pad
 	target = dockPoints.C.Position
-	TargetShuttle(shuttle, target, 4, -90, 90, 4)
+	TargetShuttle(shuttle, target, 2, -90, 90, 2)
 
 	-- Fade out shuttle launch sound which is just a faint roar at this point.
 	fadeOutSound(shuttleLaunchSound, 1)
@@ -231,17 +247,53 @@ signalLib.subscribeAsync("moveShuttle", function()
 		transitionTextLabel.TextTransparency = 1
 	end)
 
-	networkLib.listenToServer("shuttleLandedSynced", function()
-		wait(6)
+	networkLib.listenToServer("shuttleLandedSynced", function(detailedShuttle)
 		synced = true
+
+		wait(1)
+		shuttle:Destroy()
+		camera.FieldOfView = 70
+		cameraLib.setFocus(detailedShuttle.PrimaryPart, Vector3.new(-60, 10, -113))
+
+		-- Tween light colors
+		wait(2)
+		local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		local recolorParts = { unpack(station.dockDynamic:GetChildren()), unpack(detailedShuttle.misc.neonDoor:GetChildren()) }
+
+		for _, part in pairs(recolorParts) do
+			if part.Name ~= "interface" and part:IsA("BasePart") then
+				tweenService:Create(
+					part,
+					tweenInfo,
+					{ Color = activeColor }
+				):Play()
+			else
+				tweenService:Create(
+					part.SurfaceGui.status,
+					tweenInfo,
+					{ TextColor3 = activeColor }
+				):Play()
+			end
+		end
+
+		-- Extend ramp
+		local ramp = station.ramp.extension
+		local initialRampSize = ramp.Size
+		local initialRampCFrame = ramp.CFrame
+
+		local goalRampSize = Vector3.new(initialRampSize.X, initialRampSize.Y, 39)
+
+		local extensionTime = 2
+		local startTime = tick()
+
+		while tick() - startTime < extensionTime do
+			runService.Heartbeat:Wait()
+			ramp.Size = initialRampSize:Lerp(goalRampSize, (tick() - startTime)/extensionTime)
+			ramp.CFrame = initialRampCFrame + (-initialRampCFrame.lookVector * ramp.Size.Z/2)
+		end
+
+
 	end)
-
-	shuttle:Destroy()
-
-	wait(0.5)
-	cameraLib.setFocus()
-	camera.CameraType = Enum.CameraType.Custom
-	camera.FieldOfView = 70
 end)
 
 return nil

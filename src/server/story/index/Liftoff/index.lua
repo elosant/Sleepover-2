@@ -46,10 +46,10 @@ return function()
 		end
 	end
 	print("all shuttles synced")
-	networkLib.fireAllClients("shuttleLandedSynced")
-
 	local detailedShuttle = replicatedStorage.DetailedShuttle
 	detailedShuttle.Parent = workspace
+
+	networkLib.fireAllClients("shuttleLandedSynced", detailedShuttle)
 
 	local seats = {}
 	for _, seatModel in pairs(detailedShuttle.shuttleBody.seats:GetChildren()) do
