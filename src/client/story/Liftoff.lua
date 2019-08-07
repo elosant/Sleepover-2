@@ -292,7 +292,9 @@ signalLib.subscribeAsync("moveShuttle", function()
 			ramp.CFrame = initialRampCFrame + (-initialRampCFrame.lookVector * ramp.Size.Z/2)
 		end
 
-
+		wait(1)
+		cameraLib.setOrigin()
+		camera.CameraType = Enum.CameraType.Custom
 	end)
 end)
 

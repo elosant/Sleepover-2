@@ -15,15 +15,6 @@ local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
--- TODO: things to do/fire/sync
--- listen for (client-fired) waitingForIntro (synchronised)
--- fire startIntro
--- (moveShuttle will be done on client)
--- listen for shuttleLanded (synchronised)
--- place players in seats in high res shuttle
--- do ramp/robot arm effects server side
--- start The Tour
-
 return function()
 	-- This node is called subsequently after the intro is finished
 	replicationLib.listenSyncClientRequests("shuttleLanded", nil, 85)
@@ -64,4 +55,7 @@ return function()
 		seat:Sit(humanoid)
 		seats[#seats] = nil
 	end
+
+	-- Wait 10 seconds before moving on to The Tour
+	wait(10)
 end

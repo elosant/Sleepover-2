@@ -1,11 +1,12 @@
 -- Services
-local serverStorage = game:GetService("ServerStorage")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local playersService = game:GetService("Players")
 
-local server = serverStorage.server
+-- Player
+local player = playersService.LocalPlayer
+local playerScripts = player.PlayerScripts
 
-local lib = server.lib
+local client = playerScripts.client
 
 local shared = replicatedStorage.shared
 
@@ -13,8 +14,7 @@ local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
-return function()
-	networkLib.fireAllClients("startTour")
-	networkLib.fireAllClients("newChapter")
-	networkLib.fireAllClients("newObjective")
-end
+networkLib.listenToServer("startTour", function()
+end)
+
+return nil

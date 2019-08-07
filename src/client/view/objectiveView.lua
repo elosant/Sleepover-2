@@ -6,7 +6,7 @@ local player = playersService.LocalPlayer
 local playerGui = player.PlayerGui
 
 local objectiveGui = playerGui:WaitForChild("ObjectiveGui")
-local objectiveMainFrame = objectiveView.MainFrame.InnerFrame
+local objectiveMainFrame = objectiveGui.MainFrame.InnerFrame
 
 local ObjectiveView = {}
 local objectives = {}
