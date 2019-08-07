@@ -14,7 +14,8 @@ local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
 return function()
+	local station = workspace.Station
+	local tourGuide = station.scientist
+
 	networkLib.fireAllClients("startTour")
-	networkLib.fireAllClients("newChapter")
-	networkLib.fireAllClients("newObjective")
 end

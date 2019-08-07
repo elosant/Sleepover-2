@@ -24,4 +24,10 @@ signalLib.subscribeAsync("newObjective", objectiveView.onNewObjective)
 networkLib.listenToServer("removeObjective", objectiveView.onObjectiveRemoved)
 signalLib.subscribeAsync("removeObjective", objectiveView.onObjectiveRemoved)
 
+networkLib.listenToServer("newWorldObjective", objectiveView.onNewWorldObjective)
+signalLib.subscribeAsync("newWorldObjective", objectiveView.onNewWorldObjective)
+
+networkLib.listenToServer("removeWorldObjective", objectiveView.onWorldObjectiveRemoved)
+signalLib.subscribeAsync("removeWorldObjective", objectiveView.onWorldObjectiveRemoved)
+
 return nil

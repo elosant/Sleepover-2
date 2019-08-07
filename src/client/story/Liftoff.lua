@@ -258,7 +258,13 @@ signalLib.subscribeAsync("moveShuttle", function()
 		-- Tween light colors
 		wait(2)
 		local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-		local recolorParts = { unpack(station.dockDynamic:GetChildren()), unpack(detailedShuttle.misc.neonDoor:GetChildren()) }
+		local recolorParts = station.dockDynamic:GetChildren()
+
+		for _, part in pairs(detailedShuttle.shuttleBody.misc.neonDoor:GetChildren()) do
+			if part:IsA("BasePart") then
+				recolorParts[#recolorParts+1] = part
+			end
+		end
 
 		for _, part in pairs(recolorParts) do
 			if part.Name ~= "interface" and part:IsA("BasePart") then
@@ -293,7 +299,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 		end
 
 		wait(1)
-		cameraLib.setOrigin()
+		cameraLib.setFocus()
 		camera.CameraType = Enum.CameraType.Custom
 	end)
 end)

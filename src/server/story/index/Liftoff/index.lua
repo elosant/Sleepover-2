@@ -56,6 +56,6 @@ return function()
 		seats[#seats] = nil
 	end
 
-	-- Wait 10 seconds before moving on to The Tour
-	wait(10)
+	-- Wait 15 seconds before moving on to The Tour
+	wait(8)
 end

@@ -31,7 +31,7 @@ local dialogueGui = playerGui:WaitForChild("DialogueGui")
 
 -- TODO:
 -- Parse text on server, send dialogue a line at a time
--- Do now allow EvaluateStageDirections to call a function in the environment,
+-- Do not allow EvaluateStageDirections to call a function in the environment,
 -- you should instead, from the server invocation, see whetehr or not the line is/has a comamand
 -- and parse appropriately via calling only members of DialogueLib (put wait() in dialogue lib if
 -- need be). Remember to loop through characters on server too, with analogous characterRates,
