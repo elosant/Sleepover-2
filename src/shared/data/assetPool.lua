@@ -13,5 +13,10 @@ return {
 	},
 	Accessory = {
 		["Space Helmet"] = 1081366
+	},
+	Decal = {
+		Unknown = 3618148396,
+		Mark = 0,
+		Kevin = 0
 	}
 }

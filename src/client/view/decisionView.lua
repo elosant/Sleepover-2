@@ -16,10 +16,34 @@ local shared = replicatedStorage.shared
 local sharedLib = shared.lib
 local signalLib = require(sharedLib.signalLib)
 
+local sharedUtil = shared.util
+
+local guiUtil = sharedUtil.guiUtil
+local fadeObject = require(guiUtil.fadeObject)
+
 local activeAccentColor = Color3.fromRGB(136, 192, 208)
 local inactiveAccentColor = Color3.fromRGB(216, 222, 233)
 
 local chosenDecisionFrame
+local connections = {}
+local isVote
+local voterToOptionMap = {}
+
+local function disconnectConnections()
+	for _, connection in pairs(connections) do
+		connection:Disconnect()
+	end
+end
+
+local function hideDecisionFrame()
+	decisionFrame:TweenPosition(
+		UDim2.new(0.5, 0, 1.52, 0),
+		Enum.EasingDirection.Out,
+		Enum.EasingStyle.Quint,
+		0.5,
+		true
+	)
+end
 
 local function onOptionClicked(optionFrame)
 	local optionTextLabel = optionFrame.OptionTextLabel
@@ -27,6 +51,11 @@ local function onOptionClicked(optionFrame)
 	local arrowImageLabel = pinImageLabel.ArrowImageLabel
 
 	chosenDecisionFrame = optionFrame
+
+	if isVote then
+		signalLib.dispatchAsync("voteOptionClicked", optionTextLabel.Text)
+		return
+	end
 
 	-- Option text color tween.
 	tweenService:Create(
@@ -42,23 +71,14 @@ local function onOptionClicked(optionFrame)
 		{ Position = UDim2.new(0.67, 0, 0.5, 0), ImageTransparency = 1 }
 	):Play()
 
-	-- Other option fade tweens
-	local function FadeDown(guiObject)
-		tweenService:Create(
-			guiObject,
-			TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-			{
-				[(guiObject:IsA("ImageButton") or guiObject:IsA("ImageLabel")) and "ImageTransparency" or "TextTransparency"] = 1,
-				Position = guiObject.Position + UDim2.new(0, 0, 0.2, 0)
-			}
-		):Play()
-	end
+	local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	local offset = UDim2.new(0, 0, 0.2, 0)
 
 	for _, otherOptionFrame in pairs(decisionFrame.OptionsFrame:GetChildren()) do
 		if optionFrame ~= otherOptionFrame then
-			FadeDown(otherOptionFrame.OptionTextLabel)
-			FadeDown(otherOptionFrame.PinImageLabel)
-			FadeDown(otherOptionFrame.PinImageLabel.ArrowImageLabel)
+			fadeObject(true, otherOptionFrame.OptionTextLabel, tweenInfo, offset)
+			fadeObject(true, otherOptionFrame.PinImageLabel, tweenInfo, offset)
+			fadeObject(true, otherOptionFrame.PinImageLabel.ArrowImageLabel, tweenInfo, offset)
 		end
 	end
 
@@ -69,7 +89,11 @@ local function onOptionClicked(optionFrame)
 		{ Rotation = 90 }
 	):Play()
 
-	signalLib.dispatchAsync("decisionChosen", optionTextLabel.Text)
+	disconnectConnections()
+
+	signalLib.dispatchAsync("optionClicked", optionTextLabel.Text)
+	wait(2)
+	hideDecisionFrame()
 end
 
 local function onMovedInOption(isEntered, optionFrame)
@@ -93,27 +117,30 @@ local function onMovedInOption(isEntered, optionFrame)
 	):Play()
 end
 
--- Main
-for _, optionFrame in pairs(decisionFrame.OptionsFrame:GetChildren()) do
-	optionFrame.WrapperButton.MouseEnter:Connect(function()
-		onMovedInOption(true, optionFrame)
-	end)
-	optionFrame.WrapperButton.MouseLeave:Connect(function()
-		onMovedInOption(false, optionFrame)
-	end)
-	optionFrame.WrapperButton.MouseButton1Click:Connect(function()
-		onOptionClicked(optionFrame)
-	end)
-end
-
 -- Listeners
 local DecisionView = {}
 
-function DecisionView.onOptionsGiven(question, options, timer, isVote)
+function DecisionView.onOptionsGiven(question, options, timer, questionIsVote)
 	chosenDecisionFrame = nil
+	isVote = questionIsVote
+	voterToOptionMap = {}
+
 	local questionTextLabel = decisionFrame.QuestionTextLabel
 	local timerFrame = questionTextLabel.TimerFrame
 	local optionsFrame = decisionFrame.OptionsFrame
+
+	for _, optionFrame in pairs(decisionFrame.OptionsFrame:GetChildren()) do
+
+		connections[1] = optionFrame.WrapperButton.MouseEnter:Connect(function()
+			onMovedInOption(true, optionFrame)
+		end)
+		connections[2] = optionFrame.WrapperButton.MouseLeave:Connect(function()
+			onMovedInOption(false, optionFrame)
+		end)
+		connections[3] = optionFrame.WrapperButton.MouseButton1Click:Connect(function()
+			onOptionClicked(optionFrame)
+		end)
+	end
 
 	spawn(function()
 		local startTime = tick()
@@ -125,13 +152,16 @@ function DecisionView.onOptionsGiven(question, options, timer, isVote)
 			)
 			runService.RenderStepped:Wait()
 		end
+		disconnectConnections()
+		hideDecisionFrame()
 	end)
-
 	questionTextLabel.Text = question
-	-- Revert option frames.
+
+	-- Prepare option frames.
 	for _, optionFrame in pairs(optionsFrame:GetChildren()) do
 		local optionTextLabel = optionFrame.OptionTextLabel
 		local pinImageLabel = optionFrame.PinImageLabel
+		local voteCountLabel = optionFrame.VoteCountLabel
 		local arrowImageLabel = pinImageLabel.ArrowImageLabel
 
 		optionTextLabel.TextColor3 = inactiveAccentColor
@@ -143,9 +173,35 @@ function DecisionView.onOptionsGiven(question, options, timer, isVote)
 		pinImageLabel.ImageTransparency = 0
 		arrowImageLabel.Position = UDim2.new(0.67, 0, 0.5, 0)
 		arrowImageLabel.ImageTransparency = 0
+
+		voteCountLabel.Text = "0"
+		voteCountLabel.Visible = isVote
 	end
 
 	decisionFrame:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quint, 0.5, true)
+end
+
+function DecisionView.onPlayerVoted(choosingPlayer, question, option)
+	-- Local player's vote will be shown in real time, so exit
+	if choosingPlayer == player then
+		return
+	end
+
+	local previousOption = voterToOptionMap[choosingPlayer]
+	if previousOption == option then
+		print(choosingPlayer, "somehow voted for the same option twice")
+		return
+	end
+
+	local optionFrames = decisionFrame.OptionsFrame
+
+	for _, optionFrame in pairs(optionFrames) do
+		if optionFrame.OptionTextLabel.Text == option then
+			optionFrame.VoteCountLabel.Text = tonumber(optionFrame.VoteCountLabel.Text) + 1
+		elseif optionFrame.OptionTextLabel.Text == previousOption then
+			optionFrame.VoteCountLabel.Text = tonumber(optionFrame.VoteCountLabel.Text) - 1
+		end
+	end
 end
 
 return DecisionView

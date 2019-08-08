@@ -36,9 +36,11 @@ return function()
 			wait()
 		end
 	end
-	print("all shuttles synced")
+
 	local detailedShuttle = replicatedStorage.DetailedShuttle
 	detailedShuttle.Parent = workspace
+
+	workspace.Station.John:MoveTo(workspace.Station.teacherSpawnPart.Position)
 
 	networkLib.fireAllClients("shuttleLandedSynced", detailedShuttle)
 

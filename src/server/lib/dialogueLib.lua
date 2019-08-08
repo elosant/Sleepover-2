@@ -5,6 +5,7 @@ local shared = replicatedStorage.shared
 
 local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
+local signalLib = require(sharedLib.signalLib)
 local sharedDialogueLib = require(sharedLib.dialogueLib)
 
 local sharedData = shared.data
@@ -55,7 +56,6 @@ function DialogueLib.processDialogue(dialogueContent)
 			elseif not isCommand(word) then
 				-- Emulate typing yield
 				local wl = string.len(word)
-				print(word, "yield", dialogueData.typeCharacterDuration*wl)
 				wait(dialogueData.typeCharacterDuration*wl)
 			end
 		end

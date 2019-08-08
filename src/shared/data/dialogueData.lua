@@ -13,18 +13,15 @@ return {
 		open = UDim2.new(0.5, 0, 0.5, 0),
 
 		closed = {
-			CenterSpeakerFrame = UDim2.new(0.5, 0, -0.5, 0),
-			LeftSpeakerFrame = UDim2.new(-0.5, 0, 0.5, 0),
-			RightSpeakerFrame = UDim2.new(1.5, 0, 0.5, 0)
+			CenterSpeakerFrame = UDim2.new(0.5, 0, -0.52, 0),
+			LeftSpeakerFrame = UDim2.new(-0.52, 0, 0.5, 0),
+			RightSpeakerFrame = UDim2.new(1.52, 0, 0.5, 0)
 		}
 	},
 
 	commandToFunction = {
 		server = {
 			w = wait,
-			e = "fireEvent",
-			v = "startVote",
-			d = "dialogueDecision",
 		},
 
 		-- Commands included in the snippets sent to the client, when
@@ -33,9 +30,6 @@ return {
 			w = wait,
 			p = "changeSpeakerPriority",
 			n = "newSpeaker",
-			c = "fireEvent", -- Client event
-			s = "playAmbientSound",
-			d = "dialogueDescision",
 			q = "quitSpeaker",
 		}
 	},

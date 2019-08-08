@@ -5,9 +5,6 @@ return function (isFadeOut, object, tweenInfo, offset)
 	if typeof(tweenInfo) ~= "TweenInfo" then
 		tweenInfo = TweenInfo.new(tweenInfo.duration, tweenInfo.easingStyle, tweenInfo.easingDirection)
 	end
-	if not offset then
-		offset = UDim2.new(0, 0, 0, 0)
-	end
 
 	local transparencyProperty
 
@@ -19,10 +16,17 @@ return function (isFadeOut, object, tweenInfo, offset)
 		transparencyProperty = "BackgroundTransparency"
 	end
 
+	local propertyTable = {
+		[transparencyProperty] = isFadeOut and 1 or 0
+	}
+	if offset then
+		propertyTable["Position"] = object.Position + offset
+	end
+
 	tweenService:Create(
 		object,
 		tweenInfo,
-		{ Position = object.Position + offset, [transparencyProperty] = isFadeOut and 1 or 0 }
+		propertyTable
 	):Play()
 end
 
