@@ -109,7 +109,7 @@ end
 -- Listeners
 local DecisionView = {}
 
-function DecisionView.onOptionsGiven(question, options, timer)
+function DecisionView.onOptionsGiven(question, options, timer, isVote)
 	chosenDecisionFrame = nil
 	local questionTextLabel = decisionFrame.QuestionTextLabel
 	local timerFrame = questionTextLabel.TimerFrame

@@ -1,13 +1,17 @@
 -- Services
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local playersService = game:GetService("Players")
-local tweenService = game:GetService("TweenService")
 
 -- Shared
 local shared = replicatedStorage.shared
 
 local sharedLib = shared.lib
 local signalLib = require(sharedLib.signalLib)
+local sharedDialogueLib = require(sharedLib.dialogueLib)
+
+local sharedData = shared.data
+local dialogueData = require(sharedData.dialogueData)
+local assetPool = require(sharedData.assetPool)
 
 local util = shared.util
 
@@ -16,35 +20,19 @@ local getElementPosition = require(tableUtil.getElementPosition)
 
 local guiUtil = util.guiUtil
 local getTextSize = require(guiUtil.getTextSize)
+local fadeObject = require(guiUtil.fadeObject)
 
 -- Player
 local player = playersService.LocalPlayer
 local playerGui = player.PlayerGui
-local playerScripts = player.PlayerScripts
-
-local client = playerScripts.client
-
-local data = client.data
-local dialogueData = require(data.dialogueData)
 
 local dialogueGui = playerGui:WaitForChild("DialogueGui")
 
--- TODO:
--- Parse text on server, send dialogue a line at a time
--- Do not allow EvaluateStageDirections to call a function in the environment,
--- you should instead, from the server invocation, see whetehr or not the line is/has a comamand
--- and parse appropriately via calling only members of DialogueLib (put wait() in dialogue lib if
--- need be). Remember to loop through characters on server too, with analogous characterRates,
--- so all machines yield appropriately. Use replicationLib to guarantee syncroninity with other clients once
--- a dialogue has finished (use a very small maxYield)
-
-local DialogueLib = {}
-DialogueLib.Speakers = {}
-local speakers = DialogueLib.Speakers
-
-local function MoveSpeakerFrame(toOpen, speakerIndex)
+-- Functions
+local function moveSpeakerFrame(toOpen, speakerIndex)
 	local speakerFrameName = dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]
 	local speakerFrame = dialogueGui:FindFirstChild(speakerFrameName).InnerFrame
+
 	local dialogueFramePositions = dialogueData.dialogueFramePositions
 
 	speakerFrame.ImageTransparency = toOpen and 1 or 0
@@ -53,53 +41,30 @@ local function MoveSpeakerFrame(toOpen, speakerIndex)
 	speakerFrame.SpeakerNameLabel.TextTransparency = toOpen and 1 or 0
 	speakerFrame.SpeakerImageLabel.ImageTransparency = toOpen and 1 or 0
 
-	tweenService:Create(
-		speakerFrame,
-		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		{
-			Position = toOpen and dialogueFramePositions.open or dialogueFramePositions.closed[speakerFrameName],
-			ImageTransparency = toOpen and 0 or 1
-		}
-	):Play()
+	local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
-	tweenService:Create(
-		speakerFrame.DropShadow,
-		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		{
-			ImageTransparency = toOpen and 0.5 or 1
-		}
-	):Play()
+--	speakerFrame.Position = toOpen and dialogueFramePositions.open or dialogueFramePositions.closed[speakerFrameName]
 
-	tweenService:Create(
-		speakerFrame.SpeechTextLabel,
-		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		{
-			TextTransparency = toOpen and 0 or 1
-		}
-	):Play()
-
-	tweenService:Create(
-		speakerFrame.SpeakerNameLabel,
-		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		{
-			TextTransparency = toOpen and 0 or 1
-		}
-	):Play()
-
-	tweenService:Create(
-		speakerFrame.SpeakerImageLabel,
-		TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		{
-			ImageTransparency = toOpen and 0 or 1
-		}
-	):Play()
+	speakerFrame:TweenPosition(
+		toOpen and dialogueFramePositions.open or dialogueFramePositions.closed[speakerFrameName],
+		tweenInfo.EasingDirection,
+		tweenInfo.EasingStyle,
+		tweenInfo.Time,
+		true
+	)
+	fadeObject(not toOpen, speakerFrame, tweenInfo)
+	fadeObject(not toOpen, speakerFrame.DropShadow, tweenInfo)
+	fadeObject(not toOpen, speakerFrame.SpeechTextLabel, tweenInfo)
+	fadeObject(not toOpen, speakerFrame.SpeakerNameLabel, tweenInfo)
+	fadeObject(not toOpen, speakerFrame.SpeakerImageLabel, tweenInfo)
 end
 
-local function EditSpeakerName(speakerName, speakerIndex)
+local function editSpeakerName(speakerName, speakerIndex)
 	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]).InnerFrame
 	speakerFrame.SpeakerNameLabel.Text = speakerName
 end
-local function TypeText(speakerIndex, text)
+
+local function typeText(speakerIndex, text)
 	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]).InnerFrame
 
 	do
@@ -115,89 +80,104 @@ local function TypeText(speakerIndex, text)
 	end
 end
 
-local function EvaluateStageDirection(stageDirection)
-	local commandLetter = string.sub(stageDirection, 1, 1)
-	local commandFunc = dialogueData.commandToFunction[commandLetter]
-	local argStringList = string.sub(stageDirection, 2)
-	local argList = {}
+local DialogueLib = {}
+local speakers = {}
 
-	for argument in string.gmatch(argStringList, "%w+") do
-		argList[#argList+1] = argument
-	end
-
-	if type(commandFunc) == "string" then
-		commandFunc = DialogueLib[commandFunc] or getfenv()[commandFunc]
-	end
-	if type(commandFunc) ~= "function" then
-		warn("Command", tostring(commandLetter), "not recognised")
-		return
-	end
-
-	commandFunc(unpack(argList))
-end
-
-function DialogueLib.ParseText(dialogueText)
-	local function IsCommand(word)
-		local wordLen = string.len(word)
-		return (string.sub(word, 1, 1) == "[" and string.sub(word, wordLen, wordLen) == "]")
-	end
-
-	local lineArray = {}
+function DialogueLib.parseText(dialogueText)
+	local lines = {}
 
 	for line in string.gmatch(dialogueText, "(.-)\n") do
 		if line ~= "" then
-			lineArray[#lineArray+1] = line
+			lines[#lines+1] = line
 		end
 	end
 
-	for lineNumber, line in ipairs(lineArray) do
+	for _, line in ipairs(lines) do
 		local displayedString = ""
 		local speaker
 
-		local wordCount = 0
+		local wc = 0
 		for word in string.gmatch(line, "[%w%p]+") do
-			wordCount = wordCount + 1
-			local wordLen = string.len(word)
+			wc = wc+1
 
-			if IsCommand(word) then
-				EvaluateStageDirection(string.sub(word, 2, wordLen-1))
-			elseif wordCount == 1 then
+			if sharedDialogueLib.isStageDirection(word) then
+				sharedDialogueLib.evaluateStageDirection(word, DialogueLib)
+			elseif wc == 1 then
 				speaker = string.match(word, "(.-):")
 			else
 				displayedString = displayedString .. word .. " "
 			end
 		end
 
+		-- Inline waits wont work properly like this, hence avoid using them (can't be bothered to fix)
 		if speaker and displayedString then
 			local speakerIndex = getElementPosition(speakers, speaker)
-			TypeText(speakerIndex, displayedString)
+			typeText(speakerIndex, displayedString)
 		end
 	end
 end
 
-function DialogueLib.NewSpeaker(speaker, speakerIndex)
-	DialogueLib.ChangeSpeakerPriority(speaker, speakerIndex)
+function DialogueLib.newSpeaker(speaker, speakerIndex)
+	speakerIndex = speakerIndex or math.clamp(#speakers+1, 1, 3)
+	print(speaker, speakerIndex)
+	DialogueLib.changeSpeakerPriority(speaker, speakerIndex)
 end
 
-function DialogueLib.ChangeSpeakerPriority(speaker, newSpeakerIndex)
+function DialogueLib.changeSpeakerPriority(speaker, newSpeakerIndex)
 	local speakerIndex = getElementPosition(speakers, speaker)
 
 	if speakerIndex then speakers[speakerIndex] = false; end
 	speakers[tonumber(newSpeakerIndex)] = speaker
 
-	if speakerIndex then MoveSpeakerFrame(false, speakerIndex); end
-	EditSpeakerName(speaker, newSpeakerIndex)
-	MoveSpeakerFrame(true, newSpeakerIndex)
+	if speakerIndex then moveSpeakerFrame(false, speakerIndex); end
+	editSpeakerName(speaker, newSpeakerIndex)
+	moveSpeakerFrame(true, newSpeakerIndex)
 end
 
-function DialogueLib.FireEvent(eventName, ...)
-	signalLib.dispatchAsync("dialogueEvent", eventName, ...)
+function DialogueLib.fireEvent(eventName, ...)
+	signalLib.dispatchAsync("dialogueEvent", eventName, ...) -- Routed to dialogueController
 end
 
-function DialogueLib.QuitSpeaker(speaker)
+function DialogueLib.playAmbientSound(soundName)
+	local soundId = assetPool.Sound[soundName]
+	if soundId then
+		signalLib.dispatchAsync("dialoguePlayAmbient", soundId)
+	end
+end
+
+function DialogueLib.dialogueDecision(chosenPlayer, ...)
+	-- Wait for chosen player to make decision if local player is not chosen
+	local chosenPlayerSpeakerIndex = getElementPosition(speakers, chosenPlayer.Name)
+	if not chosenPlayerSpeakerIndex then
+		warn("Chosen player is not a speaker! Making player a new speaker")
+		DialogueLib.newSpeaker(chosenPlayer.Name)
+	end
+
+	if player ~= chosenPlayer then
+		local isDecided
+		signalLib.subscribeAsync("dialogueDecisionChosen", function(decidedPlayer, decisionText)
+			if player == decidedPlayer then
+				isDecided = true
+				typeText(chosenPlayerSpeakerIndex, decisionText)
+			end
+		end)
+		while not isDecided do
+			wait()
+		end
+	else
+		local options = {...}
+		local time = dialogueData.decisionMaxYield
+		signalLib.dispatchAsync("dialogueChooseDecision", time, options)
+	end
+end
+
+function DialogueLib.quitSpeaker(speaker)
 	local speakerIndex = getElementPosition(speakers, speaker)
-	MoveSpeakerFrame(false, speakerIndex)
+	if not speakerIndex then
+		return
+	end
 
+	moveSpeakerFrame(false, speakerIndex)
 	speakers[speakerIndex] = false
 end
 

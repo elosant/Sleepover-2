@@ -1,4 +1,4 @@
-local verbose = true
+local verbose = false
 
 local function displayError(moduleType, callType, err, traceback, moduleName)
 	local errOut = string.format(

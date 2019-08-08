@@ -8,8 +8,8 @@ local playerScripts = player.PlayerScripts
 
 local client = playerScripts.client
 
-local view = client.view
-local decisionView = require(view.decisionView)
+local lib = client.lib
+local decisionLib = lib.decisionLib
 
 local shared = replicatedStorage.shared
 
@@ -18,7 +18,10 @@ local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
 -- Listeners
-signalLib.subscribeAsync("optionsGiven", decisionView.onOptionsGiven)
+signalLib.subscribeAsync("chooseOption", decisionLib.chooseOption)
+
+signalLib.subscribeAsync("startVote", decisionLib.startVote)
+networkLib.listenToServer("startVote", decisionLib.startVote)
 
 -- Dispatchers
 --...
