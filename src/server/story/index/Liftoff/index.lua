@@ -40,7 +40,7 @@ return function()
 	local detailedShuttle = replicatedStorage.DetailedShuttle
 	detailedShuttle.Parent = workspace
 
-	workspace.Station.John:MoveTo(workspace.Station.teacherSpawnPart.Position)
+	workspace.Station.Mark:MoveTo(workspace.Station.teacherSpawnPart.Position)
 
 	networkLib.fireAllClients("shuttleLandedSynced", detailedShuttle)
 

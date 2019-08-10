@@ -2,6 +2,7 @@
 local playersService = game:GetService("Players")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local tweenService = game:GetService("TweenService")
+local collectionService = game:GetService("CollectionService")
 
 -- Shared
 local shared = replicatedStorage.shared
@@ -22,16 +23,23 @@ local playerGui = player.PlayerGui
 
 local dialogueGui = playerGui:WaitForChild("DialogueGui")
 
-local speakerFolder = workspace:WaitForChild("Speakers")
-
 local DialogueView = {}
+
+local function getSpeakerModel(name)
+	for _, model in pairs(collectionService:GetTagged("NPC")) do
+		if model.Name == name then
+			return model
+		end
+	end
+end
 
 function DialogueView.typeText(speakerIndex, text)
 	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]).InnerFrame
 	local speaker = speakerFrame.SpeakerNameLabel.Text
 
-	local speakerModel = speakerFolder:FindFirstChild(speaker)
 	local speakerTextLine
+	local speakerModel = getSpeakerModel(speaker)
+
 	if speakerModel then
 		speakerModel.Head.speech.Enabled = true
 		speakerTextLine = speakerModel.Head.speech.currentLine
@@ -50,10 +58,6 @@ function DialogueView.typeText(speakerIndex, text)
 		if string.sub(text, currentCharIndex, currentCharIndex) ~= " " then
 			wait(dialogueData.typeCharacterDuration)
 		end
-	end
-
-	if speakerModel then
-		speakerModel.Head.speech.Enabled = true
 	end
 end
 
@@ -83,6 +87,13 @@ function DialogueView.moveSpeakerFrame(toOpen, speakerIndex, speakers)
 	end
 
 	speakerFrame.SpeakerImageLabel.Image = speakerImageId
+
+	if not toOpen then
+		local speakerModel = getSpeakerModel(speakerName)
+		if speakerModel then
+			speakerModel.Head.speech.Enabled = false
+		end
+	end
 
 	local fadeTweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 

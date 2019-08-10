@@ -4,7 +4,7 @@ local replicatedStorage = game:GetService("ReplicatedStorage")
 local shared = replicatedStorage.shared
 
 local sharedLib = shared.lib
-local networkLib = sharedLib.networkLib
+local networkLib = require(sharedLib.networkLib)
 
 local DecisionLib = {}
 local questionToVotersMap = {}
@@ -40,7 +40,7 @@ function DecisionLib.startVote(question, options, time)
 	questionToVotersMap[question] = {}
 	local voterMap = questionToVotersMap[question]
 
-	networkLib.fireToClient("chooseOption", question, options, time)
+	networkLib.fireAllClients("startVote", question, options, time)
 	networkLib.listenToClient("optionVoted", function(choosingPlayer, voteQuestion, option)
 		-- Should implement disconnect to networkLib at some point
 		if tick() - startTime > time then
@@ -50,7 +50,7 @@ function DecisionLib.startVote(question, options, time)
 			return
 		end
 		voterMap[choosingPlayer] = option
-		networkLib.fireAllClients("optionVoted", choosingPlayer, question, option)
+		networkLib.fireAllClients("playerVoted", choosingPlayer, question, option)
 	end)
 
 	wait(time)

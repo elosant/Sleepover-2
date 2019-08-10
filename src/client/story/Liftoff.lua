@@ -115,8 +115,8 @@ signalLib.subscribeAsync("moveShuttle", function()
 	RotateThruster(shuttle.RightThruster, 45, 4)
 
 	wait(5)
-	shuttle.LeftThruster.PrimaryPart.ParticleEmitter.Enabled = true
-	shuttle.RightThruster.PrimaryPart.ParticleEmitter.Enabled = true
+	shuttle.LeftThruster.emitter.ParticleEmitter.Enabled = true
+	shuttle.RightThruster.emitter.ParticleEmitter.Enabled = true
 
 	wait(6)
 	local shuttleLaunchSound = playAmbientSound(assetPool.Sound.ShuttleLaunch)
@@ -205,8 +205,8 @@ signalLib.subscribeAsync("moveShuttle", function()
 	-- Fade out shuttle launch sound which is just a faint roar at this point.
 	fadeOutSound(shuttleLaunchSound, 1)
 
-	shuttle.LeftThruster.PrimaryPart.ParticleEmitter.Enabled = false
-	shuttle.RightThruster.PrimaryPart.ParticleEmitter.Enabled = false
+	shuttle.LeftThruster.emitter.ParticleEmitter.Enabled = false
+	shuttle.RightThruster.emitter.ParticleEmitter.Enabled = false
 
 	networkLib.fireToServer("shuttleLanded")
 
@@ -253,7 +253,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 		wait(1)
 		shuttle:Destroy()
 		camera.FieldOfView = 70
-		cameraLib.setFocus(detailedShuttle.PrimaryPart, Vector3.new(-60, 10, -113))
+		cameraLib.setFocus(detailedShuttle.PrimaryPart, Vector3.new(-60, 10, -113))---118, 24, 126))
 
 		-- Tween light colors
 		wait(2)
@@ -298,7 +298,9 @@ signalLib.subscribeAsync("moveShuttle", function()
 			ramp.CFrame = initialRampCFrame + (-initialRampCFrame.lookVector * ramp.Size.Z/2)
 		end
 
-		wait(1)
+
+		signalLib.dispatchAsync("showTransition", 0.5)
+		wait(0.5)
 		cameraLib.setFocus()
 		camera.CameraType = Enum.CameraType.Custom
 	end)

@@ -23,7 +23,7 @@ local function chooseOptionCallback(question, options, time)
 
 	local function decisionChosenCallback(option)
 		signalLib.dispatchAsync("optionChosen", question, option)
-		networkLib.fireToClient("optionChosen", question, option)
+		networkLib.fireToServer("optionChosen", question, option)
 
 		signalLib.disconnect("optionClicked", decisionChosenCallback)
 	end
@@ -31,11 +31,12 @@ local function chooseOptionCallback(question, options, time)
 end
 
 local function startVoteCallback(question, options, time)
-	decisionView.startVote(question, options, time, true)
+	print(question, options, time)
+	decisionView.onOptionsGiven(question, options, time, true)
 
 	local function votedCallback(option)
 		signalLib.dispatchAsync("optionVoted", question, option)
-		networkLib.fireToClient("optionVoted", question, option)
+		networkLib.fireToServer("optionVoted", question, option)
 
 		signalLib.disconnect("voteOptionClicked")
 	end

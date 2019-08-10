@@ -7,6 +7,7 @@ local server = serverStorage.server
 
 local lib = server.lib
 local dialogueLib = require(lib.dialogueLib)
+local decisionLib = require(lib.decisionLib)
 
 local shared = replicatedStorage.shared
 
@@ -14,17 +15,23 @@ local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
+local sharedUtil = shared.util
+
+local modelUtil = sharedUtil.modelUtil
+local tweenModel = require(modelUtil.tweenModel)
+
+-- TODO:
+-- move npc movements to client (preferably implement an npc entity system to
+-- do replication automatically).
 return function()
 	local station = workspace.Station
+	local chamber = station.decompressionChamber
 	local waypoints = station.waypoints
 
 	local kevin = station.Kevin
-	local john = station.John
+	local mark = station.Mark
 
-	kevin.Parent = workspace.Speakers
-	john.Parent = workspace.Speakers
-
-	networkLib.fireAllClients("startTour", john, kevin)
+	networkLib.fireAllClients("startTour", mark, kevin)
 
 	wait(5)
 
@@ -46,11 +53,17 @@ return function()
 	networkLib.fireAllClients("newWorldObjective", kevin.PrimaryPart.Position)
 
 	for _, waypointPart in pairs(waypoints.teacherToGuide:GetChildren()) do
-		john.Humanoid:MoveTo(waypointPart.Position)
+		mark.Humanoid:MoveTo(waypointPart.Position)
 		wait(1.2)
 	end
+	wait(2.5)
 
-	john:SetPrimaryPartCFrame(CFrame.new(waypoints.teacherToGuide.goal.Position, kevin.PrimaryPart.Position))
+	mark:SetPrimaryPartCFrame(
+		CFrame.new(
+			waypoints.teacherToGuide.goal.Position+Vector3.new(0, 3, 0),
+			kevin.PrimaryPart.Position
+		)
+	)
 
 	networkLib.fireAllClients("removeWorldObjective")
 	networkLib.fireAllClients("removeObjective", "Meet the Tour Guide")
@@ -71,7 +84,32 @@ return function()
 
 	]])
 
-	wait(3)
+	tweenModel(
+		station.door,
+		station.door.PrimaryPart.CFrame + Vector3.new(0, 15, 0),
+		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		true
+	)
+
+	networkLib.fireAllClients("newObjective", "Enter the decompression chamber")
+	networkLib.fireAllClients("newWorldObjective", chamber.door.PrimaryPart.Position)
+
+	wait(5)
+
+	for _, player in pairs(playersService:GetPlayers()) do
+		local character = player.Character
+		if character.PrimaryPart.Position.Z < station.door.PrimaryPart.Position.Z then
+			character:SetPrimaryPartCFrame(chamber.chamberTeleportPart.CFrame + Vector3.new(0, 3, 0))
+		end
+	end
+
+	tweenModel(
+		station.door,
+		station.door.PrimaryPart.CFrame - Vector3.new(0, 15, 0),
+		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		true
+	)
+
 	dialogueLib.processDialogue(
 	[[
 		Kevin: Okay, some gas wil shoot out of the pipes in this room - don't be alarmed!
@@ -97,4 +135,10 @@ return function()
 
 		[qKevin]
 	]])
+
+	local foodOption = decisionLib.startVote(
+		"What would you like to eat?",
+		{ "Peanut Butter Pizza", "Peanut Butter Burger", "Peanut Butter Sandwich" },
+		10
+	)
 end

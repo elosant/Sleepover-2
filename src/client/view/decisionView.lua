@@ -53,6 +53,7 @@ local function onOptionClicked(optionFrame)
 	chosenDecisionFrame = optionFrame
 
 	if isVote then
+		print("is vote")
 		signalLib.dispatchAsync("voteOptionClicked", optionTextLabel.Text)
 		return
 	end
@@ -97,7 +98,7 @@ local function onOptionClicked(optionFrame)
 end
 
 local function onMovedInOption(isEntered, optionFrame)
-	if chosenDecisionFrame then return end
+	if chosenDecisionFrame and not isVote then return end
 	local optionTextLabel = optionFrame.OptionTextLabel
 	local pinImageLabel = optionFrame.PinImageLabel
 	local arrowImageLabel = pinImageLabel.ArrowImageLabel
@@ -131,13 +132,13 @@ function DecisionView.onOptionsGiven(question, options, timer, questionIsVote)
 
 	for _, optionFrame in pairs(decisionFrame.OptionsFrame:GetChildren()) do
 
-		connections[1] = optionFrame.WrapperButton.MouseEnter:Connect(function()
+		connections[#connections+1] = optionFrame.WrapperButton.MouseEnter:Connect(function()
 			onMovedInOption(true, optionFrame)
 		end)
-		connections[2] = optionFrame.WrapperButton.MouseLeave:Connect(function()
+		connections[#connections+1] = optionFrame.WrapperButton.MouseLeave:Connect(function()
 			onMovedInOption(false, optionFrame)
 		end)
-		connections[3] = optionFrame.WrapperButton.MouseButton1Click:Connect(function()
+		connections[#connections+1] = optionFrame.WrapperButton.MouseButton1Click:Connect(function()
 			onOptionClicked(optionFrame)
 		end)
 	end
@@ -182,11 +183,6 @@ function DecisionView.onOptionsGiven(question, options, timer, questionIsVote)
 end
 
 function DecisionView.onPlayerVoted(choosingPlayer, question, option)
-	-- Local player's vote will be shown in real time, so exit
-	if choosingPlayer == player then
-		return
-	end
-
 	local previousOption = voterToOptionMap[choosingPlayer]
 	if previousOption == option then
 		print(choosingPlayer, "somehow voted for the same option twice")
@@ -195,13 +191,15 @@ function DecisionView.onPlayerVoted(choosingPlayer, question, option)
 
 	local optionFrames = decisionFrame.OptionsFrame
 
-	for _, optionFrame in pairs(optionFrames) do
+	for _, optionFrame in pairs(optionFrames:GetChildren()) do
 		if optionFrame.OptionTextLabel.Text == option then
 			optionFrame.VoteCountLabel.Text = tonumber(optionFrame.VoteCountLabel.Text) + 1
 		elseif optionFrame.OptionTextLabel.Text == previousOption then
 			optionFrame.VoteCountLabel.Text = tonumber(optionFrame.VoteCountLabel.Text) - 1
 		end
 	end
+
+	voterToOptionMap[choosingPlayer] = option
 end
 
 return DecisionView

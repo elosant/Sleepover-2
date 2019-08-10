@@ -164,6 +164,7 @@ function IntroView.onStartIntro()
 	-- Use cameraLib for compatability with shake
 	camera.FieldOfView = 60
 	cameraLib.setFocus(cameraOriginPart, Vector3.new(95, 35, -130))
+	cameraLib.setFog(1000)
 
 	-- Enable topbar
 	starterGui:SetCore("TopbarEnabled", true)

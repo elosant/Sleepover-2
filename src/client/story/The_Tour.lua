@@ -14,7 +14,7 @@ local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
-networkLib.listenToServer("startTour", function(john, kevin)
+networkLib.listenToServer("startTour", function(mark, kevin)
 	signalLib.dispatchAsync("newChapter", "The Tour")
 end)
 

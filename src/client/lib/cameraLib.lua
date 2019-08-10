@@ -1,6 +1,7 @@
 -- Services
 local runService = game:GetService("RunService")
 local playersService = game:GetService("Players")
+local lightingService = game:GetService("Lighting")
 
 -- Player
 local player = playersService.LocalPlayer
@@ -18,7 +19,11 @@ local cameraData = require(data.cameraData)
 local shakeData = cameraData.shakeData
 
 local CameraLib = {}
-CameraLib.shakeOscillator = DampedSine.new(shakeData.initialAmplitude, shakeData.decayConstant, shakeData.angularFrequency)
+CameraLib.shakeOscillator = DampedSine.new(
+	shakeData.initialAmplitude,
+	shakeData.decayConstant,
+	shakeData.angularFrequency
+)
 CameraLib.focusPart = nil
 
 local shakeOscillator = CameraLib.shakeOscillator
@@ -36,12 +41,15 @@ end
 function CameraLib.update()
 	-- Set focus if focusPart exists
 	if CameraLib.focusPart then
-		-- focusRestCFrame is the cframe camera is set to if focusing on part
+		-- focusRestCFrame is the cframe the camera is set to if focusing on part
 		CameraLib.focusRestCFrame = CFrame.new(
 			CameraLib.focusPart.Position + CameraLib.focusOffset,
 			CameraLib.focusPart.Position
 		)
 		camera.CFrame = CameraLib.focusRestCFrame
+	end
+	if CameraLib.billboardHookPart then
+		CameraLib.billboardHookPart.CFrame = camera.CFrame
 	end
 
 	local character = player.Character or player.CharacterAdded:Wait()
@@ -82,6 +90,9 @@ function CameraLib.setFocus(part, offset)
 	end
 	CameraLib.focusPart = part
 	CameraLib.focusOffset = offset or Vector3.new(0, 0, 0)
+end
+
+function CameraLib.setFog(radius, fogColor)
 end
 
 runService:BindToRenderStep("CameraUpdate",  Enum.RenderPriority.First.Value, CameraLib.update)

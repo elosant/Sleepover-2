@@ -105,7 +105,7 @@ function TransitionView.showTransition(duration, text, callbackDuringTransition)
 	local transitionTextLabel = transitionFrame.TransitionTextLabel
 	local fadeTweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
-	transitionTextLabel.TextTransparency = 0
+	transitionTextLabel.TextTransparency = 1
 	fadeObject(false, transitionFrame, fadeTweenInfo)
 
 	if text then
@@ -128,7 +128,7 @@ function TransitionView.showTransition(duration, text, callbackDuringTransition)
 			fadeObject(true, transitionTextLabel, fadeTweenInfo)
 		end
 
-		wait(fadeTweenInfo.Duration)
+		wait(fadeTweenInfo.Time)
 		transitionTextLabel.TextTransparency = 1
 	end
 end
