@@ -117,6 +117,8 @@ return function()
 		Kevin: It'll only take a few seconds, then we'll all be good to go.
 	]])
 
+
+
 	dialogueLib.processDialogue(
 	[[
 		Kevin: Okay, let's head into the elevator.
