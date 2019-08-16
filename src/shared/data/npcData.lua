@@ -1,9 +1,17 @@
+-- Pool found as a local variable in npcLib
 local npcData = {}
 
--- Mutable
-npcData.pool = {}
+-- Implicit fields default to all npcs:
+npcData.DefaultFields = {
+	State = "Idle",
+	AvatarModel = false, -- False so field isn't cleared during table construction
+	Target = false, -- Is CFrame to allow for rotation when npc has reached target
+	PlayingAnimation = false, -- Will be animation name, not boolean
+	TickRate = 60,
+	PathfindRate = 10,
+	UpdateCallback = false,
+}
 
--- Schemas
 -- "Characters" are essentially speakers
 npcData.Characters = {
 	Guide = {
@@ -12,15 +20,12 @@ npcData.Characters = {
 		Name = "Kevin", -- Default name, if one is not given during construction
 		Animations = {
 			Walk = "",
-			-- Optional: Run = "",
 			Jump = "",
 			Fall = ""
+			-- Optional: Run = "",
 		},
-		-- Optional: TickRate = 60 (Default nil)
-		-- Optional: PathfindRate = 10 Maximum times pathfinding computations can happen in a second
-		-- ^ (Default 10)
-	}
-	Teacher = {
+	},
+	Teacher = function() return {
 		WalkSpeed = 20,
 		Avatar = "Teacher",
 		Name = "Mark",
@@ -29,8 +34,8 @@ npcData.Characters = {
 			Jump = "",
 			Fall = ""
 		}
-	},
-	David = {
+	} end,
+	David = function() return {
 		WalkSpeed = 22,
 		Avatar = "David",
 		Name = "David",
@@ -39,18 +44,22 @@ npcData.Characters = {
 			Jump = "",
 			Fall = ""
 		}
-	}
+	} end,
 }
 npcData.Enemies = {
 	Robot = {
 
-	}
+	},
+	David = {
+	},
 }
 -- Extras are NPC's used mainly for atmospheric purposes
 npcData.Extras = {
 	Robot = {
 
-	}
+	},
+	Worker = {
+	},
 }
 
 return npcData
