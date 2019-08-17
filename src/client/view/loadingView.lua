@@ -66,8 +66,8 @@ end
 
 function loadingView.onSynced()
 	local fadeTweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-	fadeObject(true, rocketImageLabel, fadeTweenInfo, UDim2.new(0, 0, 0.05, 0))
-	fadeObject(true, loadingTextLabel, fadeTweenInfo, UDim2.new(0, 0, 0.2, 0))
+	fadeObject(true, rocketImageLabel, fadeTweenInfo)--, UDim2.new(0, 0, 0.05, 0))
+	fadeObject(true, loadingTextLabel, fadeTweenInfo)--, UDim2.new(0, 0, 0.2, 0))
 	wait(0.5)
 	fadeObject(true, loadingFrame, fadeTweenInfo)
 

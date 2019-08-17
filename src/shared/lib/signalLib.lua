@@ -73,6 +73,14 @@ function signalLib.wait(label)
 	table.remove(pausedLabelArray, index)
 end
 
+function signalLib.asyncSubscriptionExists(label)
+	return not not signalLib.signals.async[label] -- Need boolean representation, so used twice
+end
+
+function signalLib.syncSubscriptionExists(label)
+	return not not signalLib.signals.sync[label]
+end
+
 function signalLib.disconnectAsync(label, callback) -- Must be the same callback function (point to the same object).
 	local signalCollection = signalLib.signals.async[label]
 	for index, signalCallback in pairs(signalCollection) do

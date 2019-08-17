@@ -1,6 +1,6 @@
 return function(array, element)
-	for index = 1, #array do
-		if array[index] == element then
+	for index, value in pairs(array) do -- Using pairs so this will work with array w/ holes
+		if value == element then
 			return index
 		end
 	end

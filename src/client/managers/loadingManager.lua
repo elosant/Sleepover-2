@@ -1,6 +1,7 @@
 -- Services
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local contentProvider = game:GetService("ContentProvider")
+local runService = game:GetService("RunService")
 
 local shared = replicatedStorage.shared
 
@@ -28,7 +29,7 @@ function LoadingManager.init()
 	spawn(function()
 		while not preloadFinished do
 			signalLib.dispatchAsync("showAssetsLeft", contentProvider.RequestQueueSize)
-			wait()
+			runService.Heartbeat:Wait()
 		end
 		signalLib.dispatchAsync("preloadFinished")
 	end)

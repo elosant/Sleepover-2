@@ -65,17 +65,18 @@ function DialogueLib.parseText(dialogueText)
 end
 
 function DialogueLib.newSpeaker(speaker, speakerIndex)
-	speakerIndex = speakerIndex or math.clamp(#speakers+1, 1, 3)
+	speakerIndex = speakerIndex or math.clamp(#speakers+1, 1, 2)
 	DialogueLib.changeSpeakerPriority(speaker, speakerIndex)
 end
 
 function DialogueLib.changeSpeakerPriority(speaker, newSpeakerIndex)
+	newSpeakerIndex = tonumber(newSpeakerIndex)
 	local speakerIndex = getElementPosition(speakers, speaker)
 
 	if speakerIndex then speakers[speakerIndex] = false; end
-	speakers[tonumber(newSpeakerIndex)] = speaker
+	speakers[newSpeakerIndex] = speaker
 
-	if speakerIndex then dialogueView.moveSpeakerFrame(false, speakerIndex); end
+	if speakerIndex then dialogueView.moveSpeakerFrame(false, speakerIndex, speakers); end
 	dialogueView.editSpeakerName(speaker, newSpeakerIndex)
 	dialogueView.moveSpeakerFrame(true, newSpeakerIndex, speakers)
 end

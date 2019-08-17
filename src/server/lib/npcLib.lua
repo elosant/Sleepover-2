@@ -2,6 +2,11 @@
 local serverStorage = game:GetService("ServerStorage")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
+local server = serverStorage.server
+
+local components = server.components
+local npcComponents = components.npc
+
 local shared = replicatedStorage.shared
 
 local sharedData = shared.data
@@ -76,18 +81,35 @@ function NpcLib.getNpcDataById(npcId)
 end
 
 function NpcLib._update()
-	-- No seperately/explicitly defined "components" nor systems, so
-	-- we will instead handle ALL update logic in faux "systems" controlling,
-	-- logic for different npc types, encompassing position updates, health,
-	-- pathfinding, attacking, etc.
-	for npcId, npcInfo in pairs(NpcLib.pool) do
+	debug.profilebegin("npc_update")
+	for npcId in pairs(NpcLib.pool) do
 		NpcLib._updateNpc(npcId)
 	end
+	debug.profileend("npc_update")
 end
 
 function NpcLib._updateNpc(npcId)
+	local npcInfo = NpcLib.getNpcDataById(npcId)
 
+	local function CallComponentIfExist(componentName)
+		local componentModule = npcComponents:FindFirstChild(componentName)
+		if componentModule then
+			require(componentModule)(npcInfo)
+		end
+	end
+
+	for _, component in pairs(npcData.typeToComponentsMap.All) do
+		CallComponentIfExist(component)
+	end
+
+	local npcTypeData = npcData.typeToComponentsMap[npcInfo]
+	if not npcTypeData then
+		return
+	end
+
+	for _, component in pairs(npcTypeData) do
+		CallComponentIfExist(component)
+	end
 end
-
 
 return NpcLib

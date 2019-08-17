@@ -75,10 +75,17 @@ function CameraLib.update()
 			0
 		)
 	else
-		camera.CFrame = CameraLib.focusRestCFrame + Vector3.new(
-			getOffsetComponent(),
-			getOffsetComponent(),
-			0
+		camera.CFrame = CFrame.new(
+			CameraLib.focusRestCFrame.p,-- + Vector3.new(
+				--getOffsetComponent(),
+				--getOffsetComponent(),
+				--0
+			--),
+			(CameraLib.focusRestCFrame.p + CameraLib.focusRestCFrame.lookVector) + Vector3.new(
+				getOffsetComponent(),
+				getOffsetComponent(),
+				0
+			)
 		)
 	end
 	cameraBlur.Size = shakeOscillator:getValue()*2.5
@@ -95,6 +102,6 @@ end
 function CameraLib.setFog(radius, fogColor)
 end
 
-runService:BindToRenderStep("CameraUpdate",  Enum.RenderPriority.First.Value, CameraLib.update)
+runService:BindToRenderStep("CameraUpdate",  Enum.RenderPriority.Last.Value, CameraLib.update)
 
 return CameraLib

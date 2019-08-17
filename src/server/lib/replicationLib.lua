@@ -55,13 +55,13 @@ function ReplicationLib.listenSyncClientRequests(label, minPlayers, maxYield)
 
 			if #registeredClients > 0 then
 				if labelData.minPlayers and #registeredClients >= labelData.minPlayers then
-					print("min players reached")
+					print("Min players reached")
 					isSynced = true
 				elseif not labelData.minPlayers and #registeredClients >= #playersService:GetPlayers() then
-					print("registered clients reached player count", #playersService:GetPlayers())
+					print("Registered clients reached player count", #playersService:GetPlayers())
 					isSynced = true
 				elseif tick() - labelData.syncListenStarted >= labelData.maxYield then
-					print("elapsed time exceeded maxYield")
+					print("Elapsed time exceeded maxYield")
 					isSynced = true
 				end
 			end

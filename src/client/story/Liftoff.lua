@@ -105,6 +105,14 @@ signalLib.subscribeAsync("moveShuttle", function()
 	local target = dockPoints.A.Position
 	local activeColor = Color3.fromRGB(13, 105, 172) -- Bright blue brick color
 
+	-- Focus camera on shuttle
+	local cameraOriginPart = workspace.Shuttle.CameraOrigin
+
+	-- Use cameraLib for compatability with shake
+	camera.FieldOfView = 60
+	cameraLib.setFocus(cameraOriginPart, Vector3.new(95, 35, -130))
+	cameraLib.setFog(1000)
+
 	wait(1.5)
 	signalLib.dispatchAsync("newChapter", "Liftoff")
 
@@ -122,7 +130,8 @@ signalLib.subscribeAsync("moveShuttle", function()
 	local shuttleLaunchSound = playAmbientSound(assetPool.Sound.ShuttleLaunch)
 	wait(2)
 
-	local movementTween = MoveShuttle(shuttle, target, 1)--30)
+	-- EDIT
+	local movementTween = MoveShuttle(shuttle, target, 1)--25)
 
 	-- Play sounds until reached
 	local targetReached do
@@ -132,7 +141,8 @@ signalLib.subscribeAsync("moveShuttle", function()
 		-- Shake until reached target
 		spawn(function()
 			while not targetReached do
-				cameraLib.shake(math.random(5.5,9), math.random(1,2.5), math.random(1,2))
+				--cameraLib.shake(math.random(0.15,0.5), math.random(1,2.5), math.random(1,1.5))
+				cameraLib.shake(0.35, 1, 1)
 				playAmbientSound(assetPool.Sound.RattleSound, { PlaybackSpeed = 5 })
 				wait(math.random(2.5, 6))
 			end
@@ -147,23 +157,21 @@ signalLib.subscribeAsync("moveShuttle", function()
 	end
 
 	-- Transition to night
-	do
-		local transitionToTime = 24
-		spawn(function()
-			while not targetReached do
-				if shuttle.PrimaryPart.Position.Y > 2900 then
-					tweenService:Create(
-						lightingService,
-						TweenInfo.new(18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-						{ ClockTime = transitionToTime }
-					):Play()
-	--				replicatedStorage.Sky.Parent = lightingService
-					break
-				end
-				wait()
+	local transitionToTime = 24
+	spawn(function()
+		while not targetReached do
+			if shuttle.PrimaryPart.Position.Y > 2900 then
+				tweenService:Create(
+					lightingService,
+					TweenInfo.new(18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+					{ ClockTime = transitionToTime }
+				):Play()
+--				replicatedStorage.Sky.Parent = lightingService
+				break
 			end
-		end)
-	end
+			wait()
+		end
+	end)
 
 	-- Wait until (first) target reached
 	movementTween.Completed:Wait()
@@ -298,9 +306,10 @@ signalLib.subscribeAsync("moveShuttle", function()
 			ramp.CFrame = initialRampCFrame + (-initialRampCFrame.lookVector * ramp.Size.Z/2)
 		end
 
+		wait(1.5)
+		signalLib.dispatchAsync("showTransition", 1.5)
+		wait(1)
 
-		signalLib.dispatchAsync("showTransition", 0.5)
-		wait(0.5)
 		cameraLib.setFocus()
 		camera.CameraType = Enum.CameraType.Custom
 	end)

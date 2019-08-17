@@ -185,7 +185,6 @@ end
 function DecisionView.onPlayerVoted(choosingPlayer, question, option)
 	local previousOption = voterToOptionMap[choosingPlayer]
 	if previousOption == option then
-		print(choosingPlayer, "somehow voted for the same option twice")
 		return
 	end
 

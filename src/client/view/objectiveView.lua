@@ -34,6 +34,8 @@ function ObjectiveView.onNewObjective(objective, position)
 		return
 	end
 
+	objectiveFrame.ObjectiveText.Text = objective
+
 	if not isFrameVisible then
 		isFrameVisible = true
 		objectiveMainFrame:TweenPosition(
@@ -46,7 +48,6 @@ function ObjectiveView.onNewObjective(objective, position)
 		wait(0.5)
 	end
 
-	objectiveFrame.ObjectiveText.Text = objective
 	objectiveFrame:TweenPosition(
 		UDim2.new(0, 0, objectiveFrame.Position.Y.Scale, 0),
 		Enum.EasingDirection.Out,

@@ -38,11 +38,11 @@ function LoadingManager.init()
 	if not runService:IsStudio() then
 		wait(25)
 	else
-		wait(8)
+		wait(5)
 	end
 
 	isYield = false
-	print("yield ended")
+	print("Yield ended")
 
 	replicationLib.listenSyncClientRequests(
 		"waitingForIntro",
@@ -58,7 +58,7 @@ function LoadingManager.init()
 	-- Start intro for players after players have subscribed and are synchronised
 	signalLib.subscribeAsync("clientRequestsSynced", function(label)
 		if label == "waitingForIntro" then
-			print("client requests synced, starting intro")
+			print("Client requests synced, starting intro")
 			networkLib.fireAllClients("startIntro")
 
 			-- Init story manager from here (is excluded from index server script)

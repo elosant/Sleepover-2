@@ -4,9 +4,8 @@ return {
 
 	-- Speaker Index: Frame Name
 	dialogueSpeakerToFrame = {
-		[1] = "CenterSpeakerFrame",
-		[2] = "LeftSpeakerFrame",
-		[3] = "RightSpeakerFrame"
+		[1] = "LeftSpeakerFrame",
+		[2] = "RightSpeakerFrame",
 	},
 
 	dialogueFramePositions = {

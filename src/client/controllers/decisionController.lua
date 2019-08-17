@@ -35,8 +35,11 @@ local function startVoteCallback(question, options, time)
 	decisionView.onOptionsGiven(question, options, time, true)
 
 	local function votedCallback(option)
-		signalLib.dispatchAsync("optionVoted", question, option)
 		networkLib.fireToServer("optionVoted", question, option)
+
+		if signalLib.asyncSubscriptionExists("optionVoted") then
+			signalLib.dispatchAsync("optionVoted", question, option)
+		end
 
 		signalLib.disconnect("voteOptionClicked")
 	end

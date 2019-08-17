@@ -12,6 +12,35 @@ npcData.DefaultFields = {
 	UpdateCallback = false,
 }
 
+npcData.typeToComponentsMap = {
+	All = {
+		"movement",
+		"pathfind",
+		"animation",
+	},
+	Characters = {
+		"speaker",
+	},
+	Enemies = {
+		"attack",
+		"health",
+	},
+	Extras = { -- No extra components, yet
+	}
+}
+
+-- Fields that get added to an npc entity if they have said component
+npcData.componentFields = {
+	movement = {
+		"Position",
+		"LookPosition",
+		"Mass",
+		"Speed",
+		"Target"
+	},
+	pathfind = { , }
+}
+
 -- "Characters" are essentially speakers
 npcData.Characters = {
 	Guide = {

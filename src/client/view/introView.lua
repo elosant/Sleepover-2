@@ -33,9 +33,6 @@ local guiUtil = sharedUtil.guiUtil
 local fadeObject = require(guiUtil.fadeObject)
 local getCharWidth = require(guiUtil.getCharWidth)
 
-local modelUtil = sharedUtil.modelUtil
-local moveModel = require(modelUtil.moveModel)
-
 local audioUtil = sharedUtil.audioUtil
 local playAmbientSound = require(audioUtil.playAmbientSound)
 
@@ -46,7 +43,7 @@ IntroView.hasStarted = false
 local cursor
 
 local function TypeText(textObject, text)
-	local typeRate = 1/30--1/12
+	local typeRate = 1/12
 
 	cursor.Parent = textObject
 	cursor.Visible = true
@@ -69,6 +66,7 @@ local function TypeText(textObject, text)
 end
 
 function IntroView.onStartIntro()
+	--[[ EDIT
 	if IntroView.hasStarted then
 		warn("Attempted to play start intro more than once")
 		return
@@ -140,14 +138,14 @@ function IntroView.onStartIntro()
 	wait(1.5)
 	playAmbientSound(assetPool.Sound.DoYouRead)
 
---	wait(3)
+	wait(3)
 
 	-- Fade out stuff
 	local fadeTweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 	local fadeTweenOffset = UDim2.new(0, 0, 0.2, 0)
 
 	fadeObject(true, cursor, fadeTweenInfo)
-	fadeObject(true, yearClippingFrame.YearText, fadeTweenInfo, fadeTweenOffset)
+	fadeObject(true, yearClippingFrame.YearText, fadeTweenInfo)--, fadeTweenOffset)
 	fadeObject(true, yearClippingFrame.YearText.MagnitudeText, fadeTweenInfo, fadeTweenOffset)
 	wait(0.7)
 	fadeObject(true, contextTextLabel, fadeTweenInfo, fadeTweenOffset)
@@ -158,16 +156,10 @@ function IntroView.onStartIntro()
 	wait(1)
 	fadeObject(true, introFrame, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), UDim2.new())
 
-	-- Focus camera on shuttle
-	local cameraOriginPart = workspace.Shuttle.CameraOrigin
-
-	-- Use cameraLib for compatability with shake
-	camera.FieldOfView = 60
-	cameraLib.setFocus(cameraOriginPart, Vector3.new(95, 35, -130))
-	cameraLib.setFog(1000)
-
 	-- Enable topbar
 	starterGui:SetCore("TopbarEnabled", true)
+
+	--]]
 
 	-- Fire introFinished
 	signalLib.dispatchAsync("introFinished")

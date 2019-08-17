@@ -15,11 +15,6 @@ local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
-local sharedUtil = shared.util
-
-local modelUtil = sharedUtil.modelUtil
-local tweenModel = require(modelUtil.tweenModel)
-
 -- TODO:
 -- move npc movements to client (preferably implement an npc entity system to
 -- do replication automatically).
@@ -31,13 +26,13 @@ return function()
 	local kevin = station.Kevin
 	local mark = station.Mark
 
-	networkLib.fireAllClients("startTour", mark, kevin)
+	networkLib.fireAllClients("startTour")
 
 	wait(5)
 
 	dialogueLib.processDialogue(
 	[[
-		[nMark]
+		[nMark,2]
 
 		Mark: Okay kids, let's get off the shuttle!
 		[w3]
@@ -79,17 +74,13 @@ return function()
 		Kevin: Since you're staying here for 3 days, I thought I'd show you around the station.
 		[w3]
 		Kevin: First, we need to head into the depressurization chamber,
-		[w2]
+		[w1]
 		Kevin: so we can safely enter the ship.
 
 	]])
 
-	tweenModel(
-		station.door,
-		station.door.PrimaryPart.CFrame + Vector3.new(0, 15, 0),
-		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-		true
-	)
+	-- Open door locally
+	networkLib.fireAllClients("tweenChamberDoor", true)
 
 	networkLib.fireAllClients("newObjective", "Enter the decompression chamber")
 	networkLib.fireAllClients("newWorldObjective", chamber.door.PrimaryPart.Position)
@@ -98,27 +89,22 @@ return function()
 
 	for _, player in pairs(playersService:GetPlayers()) do
 		local character = player.Character
-		if character.PrimaryPart.Position.Z < station.door.PrimaryPart.Position.Z then
+		if character.PrimaryPart.Position.Z < station.door.PrimaryPart.Position.Z + 5 then
 			character:SetPrimaryPartCFrame(chamber.chamberTeleportPart.CFrame + Vector3.new(0, 3, 0))
 		end
 	end
 
-	tweenModel(
-		station.door,
-		station.door.PrimaryPart.CFrame - Vector3.new(0, 15, 0),
-		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-		true
-	)
+	-- Close door locally
+	networkLib.fireAllClients("tweenChamberDoor", false)
 
 	dialogueLib.processDialogue(
 	[[
 		Kevin: Okay, some gas wil shoot out of the pipes in this room - don't be alarmed!
-		[w3]
+		[w2]
 		Kevin: It'll only take a few seconds, then we'll all be good to go.
 	]])
 
-
-
+	wait(3)
 	dialogueLib.processDialogue(
 	[[
 		Kevin: Okay, let's head into the elevator.
