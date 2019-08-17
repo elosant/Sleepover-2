@@ -16,7 +16,7 @@ local networkLib = require(sharedLib.networkLib)
 local signalLib = require(sharedLib.signalLib)
 
 -- TODO:
--- move npc movements to client (preferably implement an npc entity system to
+-- Move npc movements to client (preferably implement an npc entity system to
 -- do replication automatically).
 return function()
 	local station = workspace.Station
