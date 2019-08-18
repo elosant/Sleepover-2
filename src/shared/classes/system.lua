@@ -10,51 +10,57 @@ local sharedData = shared.data
 local entityPool = require(sharedData.entityPool)
 
 local system = {}
-system.registeredEntityCount = 0
 system.__index = system
 
 function system.new(componentName)
-	entityPool.componentEntityMap[componentName] = {}
+	local systemPool = entityPool.componentEntityMap[componentName] or {}
+	entityPool.componentEntityMap[componentName] = systemPool
 
 	-- Base system intentionally lacks a default update() member
 	local self = setmetatable({}, system)
+	self.registeredEntityCount = 0
+	self.pool = systemPool
 
 	signalLib.subscribeAsync("componentAttached", function(attachedComponentName, entityId)
-		if attachedComponentName ~= componentName then
-			return
+		if attachedComponentName == componentName then
+			self:onEntityRegistered(entityId)
 		end
-		system.onEntityRegistered(entityId)
 	end)
 	signalLib.subscribeAsync("componentDetached", function(detachedComponentName, entityId)
-		if detachedComponentName ~= componentName then
-			return
+		if detachedComponentName == componentName then
+			self:onEntityRegistered(entityId)
 		end
-		system.onEntityRegistered(entityId)
+	end)
+	-- Allows for communication between systems
+	signalLib.subscribeAsync("entitySignal", function(component, entityId, ...)
+		if component == componentName and self.onEntitySignal then
+			self:onEntitySignal(entityId, ...)
+		end
 	end)
 
 	return self
 end
 
 -- Called implicitly by entityPool's addComponent function.
-function system.onEntityRegistered(entityId)
-	system.registeredEntityCount = system.registeredEntityCount + 1
+function system:onEntityRegistered(entityId)
+	self.registeredEntityCount = self.registeredEntityCount + 1
 
 	-- Calls inhereted class' entity registered callback if it has one.
-	if system["_onEntityRegistered"] then
-		system._onEntityRegistered(entityId)
+	if self._onEntityRegistered then
+		self:_onEntityRegistered(entityId)
 	end
 
 	return entityId
 end
 
 -- Called implicitly by entityPool's removeComponent function.
-function system.onEntityDeregistered(entityId)
+function system:onEntityDeregistered(entityId)
 	-- Guard clause not needed, the entity is checked for its existence in entityPool.
-	system.registeredEntityCount = system.registeredEntityCount - 1
+	self.registeredEntityCount = self.registeredEntityCount - 1
 
 	-- Calls inhereted class' entity registered callback if it has one.
-	if system["_onEntityDeregistered"] then
-		system._onEntityDeregistered(entityId)
+	if self["_onEntityDeregistered"] then
+		self:_onEntityDeregistered(entityId)
 	end
 end
 

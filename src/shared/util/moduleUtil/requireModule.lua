@@ -1,3 +1,6 @@
+-- Services
+local runService = game:GetService("RunService")
+
 local verbose = false
 
 local function displayError(moduleType, callType, err, traceback, moduleName)
@@ -12,7 +15,9 @@ local function displayError(moduleType, callType, err, traceback, moduleName)
 	warn(errOut)
 
 	if moduleType == "manager" then
-		warn(string.format("WILL NOT ATTEMPT TO INIT MANAGER: %s", moduleName))
+		warn("WARNING: WILL NOT ATTEMPT TO INIT MANAGER: " .. moduleName)
+	elseif moduleType == "system" then
+		warn("WARNING: WILL NOT ATTEMPT TO UPDATE SYSTEM: " .. moduleName)
 	end
 end
 
@@ -36,10 +41,27 @@ return function(moduleType, module)
 				print("[INIT]:", module.Name)
 			end
 
-			local success, initErr = pcall(data.init)
-			if not success then
+			local initSuccess, initErr = pcall(data.init)
+			if not initSuccess then
 				displayError(moduleType, "init", initErr, debug.traceback(), module.Name)
 			end
+		elseif moduleType == "system" and data.update then
+			if verbose then
+				print("[FIRST_SYSTEM_UPDATE:", module.Name)
+			end
+
+			-- Will attempt to update once to check if legal
+			local updateSuccess, updateErr = pcall(data.update, data)
+			if not updateSuccess then
+				displayError(moduleType, "update", updateErr, debug.traceback(), module.Name)
+				return
+			end
+
+			runService.Heartbeat:Connect(function(step)
+				debug.profilebegin("system_step: " .. module.Name)
+				data:update(step)
+				debug.profileend("system_step: " .. module.Name)
+			end)
 		end
 	end)
 

@@ -17,7 +17,6 @@ function signalLib.dispatchAsync(label, ...)
 	for _, signalCallback in pairs(signalLib.signals.async[label]) do
 		local callbackCoroutine = coroutine.create(signalCallback)
 		coroutine.resume(callbackCoroutine, ...)
-		wait()
 	end
 
 	local pausedLabelArray = signalLib.paused[label]

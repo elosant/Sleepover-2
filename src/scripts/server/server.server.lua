@@ -1,10 +1,12 @@
 -- Services
 local serverStorage = game:GetService("ServerStorage")
 local replicatedStorage = game:GetService("ReplicatedStorage")
-local runService = game:GetService("RunService")
 
-local managers = serverStorage.server.managers
-local controllers = serverStorage.server.controllers
+local server = serverStorage.server
+
+local managers = server.managers
+local controllers = server.controllers
+local systems = server.systems
 
 local shared = replicatedStorage.shared
 
@@ -18,14 +20,20 @@ local excludedModules = {
 	storyManager = true
 }
 
-for _, controller in pairs(controllers:GetChildren()) do
-	if not excludedModules[controller.Name] then
-		requireModule("controller", controller)
+for _, controllerModule in pairs(controllers:GetChildren()) do
+	if not excludedModules[controllerModule.Name] then
+		requireModule("controller", controllerModule)
 	end
 end
 
-for _, manager in pairs(managers:GetChildren()) do
-	if not excludedModules[manager.Name] then
-		requireModule("manager", manager)
+for _, managerModule in pairs(managers:GetChildren()) do
+	if not excludedModules[managerModule.Name] then
+		requireModule("manager", managerModule)
+	end
+end
+
+for _, systemModule in pairs(systems:GetChildren()) do
+	if not excludedModules[systemModule.Name] then
+		requireModule("system", systemModule)
 	end
 end

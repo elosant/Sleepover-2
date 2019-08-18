@@ -1,6 +1,5 @@
 -- Services
 local replicatedStorage = game:GetService("ReplicatedStorage")
-local httpService = game:GetService("HttpService")
 
 local shared = replicatedStorage.shared
 
@@ -13,20 +12,22 @@ entityPool.componentEntityMap = {}
 entityPool.serialEntityCount = 0
 
 -- Accepts a tuple of components that are registered to on construction.
-function entityPool.createEntity(...)
+function entityPool.createEntity(componentName, componentDataCollection)
 	entityPool.serialEntityCount = entityPool.serialEntityCount + 1
 
-	-- A GUID is used as the entityId instead of serial global count,
-	-- the pool need not be contiguous (since entities can be deleted).
-	local entityId = httpService:GenerateGUID()
+	local entityId = entityPool.serialEntityCount
 
 	entityPool.entities[entityId] = {} -- Associative array containing all components associated with entity.
 
-	for _, componentName in pairs({...}) do
-		entityPool.addComponent(entityId, componentName)
+	for _, componentData in pairs(componentDataCollection) do
+		entityPool.addComponentToEntity(entityId, componentName, componentData)
 	end
 
 	return entityId
+end
+
+function entityPool.getEntityById(entityId)
+	return entityPool.entities[entityId]
 end
 
 function entityPool.removeEntity(entityId)
@@ -42,12 +43,20 @@ function entityPool.removeEntity(entityId)
 	entityPool.entities[entityId] = nil
 end
 
-function entityPool.addComponentToEntity(entityId, componentName)
+function entityPool.addComponentToEntity(entityId, componentName, componentData)
 	local entityComponentCollection = entityPool.entities[entityId]
 	if not entityComponentCollection then return end
 
-	entityComponentCollection[componentName] = true
-	entityPool.componentEntityMap[componentName][entityId] = true
+	entityComponentCollection[componentName] = componentData
+
+	if not entityPool.componentEntityMap[componentName] then
+		entityPool.componentEntityMap[componentName] = {}
+		warn("System for " .. componentName .. " has not yet been constructed")
+		print("Adding field to componentEntityMap for above component")
+	end
+
+	entityPool.componentEntityMap[componentName][entityId] = componentData
+	print(entityComponentCollection[componentName], entityPool.componentEntityMap[componentName][entityId])
 
 	signalLib.dispatchAsync("componentAttached", componentName, entityId)
 end

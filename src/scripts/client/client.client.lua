@@ -9,9 +9,11 @@ local player = playersService.LocalPlayer
 local playerScripts = player.PlayerScripts
 
 local client = playerScripts.client
+
 local managers = client.managers
 local controllers = client.controllers
 local story = client.story
+local systems = client.systems
 
 local shared = replicatedStorage.shared
 
@@ -25,16 +27,30 @@ local networkLib = require(sharedLib.networkLib)
 -- Disable reset
 starterGui:SetCore("ResetButtonCallback", false)
 
--- Require (and init) modules.
+local excludedModules = {
+}
+
+-- Require (and init/update) modules.
 for _, controllerModule in pairs(controllers:GetChildren()) do
-	requireModule("controller", controllerModule)
+	if not excludedModules[controllerModule.Name] then
+		requireModule("controller", controllerModule)
+	end
 end
 
 for _, storyModule in pairs(story:GetChildren()) do
-	requireModule("story_node", storyModule)
+	if not excludedModules[storyModule.Name] then
+		requireModule("story_node", storyModule)
+	end
 end
 
 for _, managerModule in pairs(managers:GetChildren()) do
-	requireModule("manager", managerModule)
+	if not excludedModules[managerModule.Name] then
+		requireModule("manager", managerModule)
+	end
 end
 
+for _, systemModule in pairs(systems:GetChildren()) do
+	if not excludedModules[systemModule.Name] then
+		requireModule("system", systemModule)
+	end
+end
