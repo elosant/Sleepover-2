@@ -25,7 +25,9 @@ local sharedLib = shared.lib
 local networkLib = require(sharedLib.networkLib)
 
 -- Disable reset
-starterGui:SetCore("ResetButtonCallback", false)
+delay(nil, function()
+	pcall(starterGui.SetCore, starterGui, "ResetButtonCallback", false)
+end)
 
 local excludedModules = {
 }
