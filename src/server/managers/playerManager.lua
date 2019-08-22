@@ -39,6 +39,7 @@ function PlayerManager.init()
 	physicsService:CreateCollisionGroup(characterCollisionName)
 	physicsService:CollisionGroupSetCollidable(characterCollisionName, characterCollisionName, false)
 
+	wait(3)
 	for _, npc in pairs(collectionService:GetTagged("NPC")) do
 		setModelCollisionGroup(npc, characterCollisionName)
 	end

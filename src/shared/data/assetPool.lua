@@ -10,6 +10,7 @@ return {
 		RocketRoar = 3539841396,
 		CountdownTenMale = 3539835608,
 		DoYouRead = 3539980148,
+		UnfunnySound = 138143457,
 	},
 	Accessory = {
 		["Space Helmet"] = 1081366

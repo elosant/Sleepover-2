@@ -21,14 +21,40 @@ local tweenModel = require(modelUtil.tweenModel)
 
 networkLib.listenToServer("startTour", function()
 	signalLib.dispatchAsync("newChapter", "The Tour")
+	local station = workspace.Station
+	local chamber = station.decompressionChamber
 
 	networkLib.listenToServer("tweenChamberDoor", function(isOpen)
-		local station = workspace.Station
 		tweenModel(
 			station.door,
 			station.door.PrimaryPart.CFrame + (isOpen and 1 or -1) * Vector3.new(0, 15, 0),
 			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 			true
+		)
+	end)
+	networkLib.listenToServer("tweenChamberExitDoor", function(isOpen)
+		tweenModel(
+			chamber.door,
+			chamber.door.PrimaryPart.CFrame + (isOpen and 1 or -1) * Vector3.new(0, 15, 0),
+			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+			true
+		)
+	end)
+	networkLib.listenToServer("tweenChamberElevatorDoor", function(isOpen)
+		local leftDoor = station.elevator.leftDoor
+		local rightDoor = station.elevator.rightDoor
+
+		tweenModel(
+			station.elevator.leftDoor,
+			leftDoor.PrimaryPart.CFrame + (isOpen and 1 or -1) * Vector3.new(7, 0, 0),
+			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+			false
+		)
+		tweenModel(
+			station.elevator.rightDoor,
+			rightDoor.PrimaryPart.CFrame + (isOpen and -1 or 1) * Vector3.new(7, 0, 0),
+			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+			false
 		)
 	end)
 end)

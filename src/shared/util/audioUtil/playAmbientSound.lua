@@ -1,7 +1,14 @@
 return function(soundId, soundData, keepOnEnd, isYield, endedCallback, soundGroupName)
+	if not soundId then
+		warn("No sound id given")
+		return
+	end
 	if not soundGroupName then soundGroupName = "Ambient"; end
-	if type(soundId) == "number" or string.sub(soundId, 1, 13) ~= "rbxassetid://" then
+	if type(soundId) == "string" and string.sub(soundId, 1, 13) ~= "rbxassetid://" or type(soundId) == "number" then
 		soundId = "rbxassetid://" .. tostring(soundId)
+	else
+		warn("Sound id not valid")
+		return
 	end
 
 	local soundGroup = game:GetService("SoundService"):FindFirstChild(soundGroupName)
@@ -24,7 +31,7 @@ return function(soundId, soundData, keepOnEnd, isYield, endedCallback, soundGrou
 	sound:Play()
 
 	if endedCallback then
-		sound.Ended:Connect(function() soundCallback(sound); end)
+		sound.Ended:Connect(function() endedCallback(sound); end)
 		return sound
 	end
 	if isYield then
