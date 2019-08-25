@@ -42,7 +42,6 @@ function LoadingManager.init()
 	end
 
 	isYield = false
-	print("Yield ended")
 
 	replicationLib.listenSyncClientRequests(
 		"waitingForIntro",
@@ -58,7 +57,6 @@ function LoadingManager.init()
 	-- Start intro for players after players have subscribed and are synchronised
 	signalLib.subscribeAsync("clientRequestsSynced", function(label)
 		if label == "waitingForIntro" then
-			print("Client requests synced, starting intro")
 			networkLib.fireAllClients("startIntro")
 
 			-- Init story manager from here (is excluded from index server script)

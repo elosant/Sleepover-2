@@ -40,22 +40,37 @@ networkLib.listenToServer("startTour", function()
 			true
 		)
 	end)
-	networkLib.listenToServer("tweenChamberElevatorDoor", function(isOpen)
-		local leftDoor = station.elevator.leftDoor
-		local rightDoor = station.elevator.rightDoor
+
+	local function tweenElevatorDoor(elevator, isOpen, leftDoorOpenDir)
+		local leftDoor = elevator.leftDoor
+		local rightDoor = elevator.rightDoor
 
 		tweenModel(
 			station.elevator.leftDoor,
-			leftDoor.PrimaryPart.CFrame + (isOpen and 1 or -1) * Vector3.new(7, 0, 0),
+			leftDoor.PrimaryPart.CFrame + (isOpen and leftDoorOpenDir or -leftDoorOpenDir) * Vector3.new(7, 0, 0),
 			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 			false
 		)
 		tweenModel(
 			station.elevator.rightDoor,
-			rightDoor.PrimaryPart.CFrame + (isOpen and -1 or 1) * Vector3.new(7, 0, 0),
+			rightDoor.PrimaryPart.CFrame + (isOpen and -leftDoorOpenDir or leftDoorOpenDir) * Vector3.new(7, 0, 0),
 			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 			false
 		)
+
+	end
+
+	networkLib.listenToServer("tweenChamberElevatorDoor", function(isOpen)
+		tweenElevatorDoor(station.elevator, isOpen, 1)
+	end)
+
+	local cafeteria = station.cafeteria
+	networkLib.listenToServer("tweenCafeEntranceDoor", function(isOpen)
+		tweenElevatorDoor(cafeteria.entrance.elevator, isOpen, -1)
+	end)
+
+	networkLib.listenToServer("tweenCafeExitDoor", function(isOpen)
+		tweenElevatorDoor(cafeteria.exit.elevator, isOpen, 1)
 	end)
 end)
 

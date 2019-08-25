@@ -1,6 +1,6 @@
 local runService = game:GetService("RunService")
 
-return function(signal, callback, maxYield)
+return function(signal, maxYield, callback)
 	local isFinished
 	local connection
 	local args
@@ -11,7 +11,9 @@ return function(signal, callback, maxYield)
 		end)
 	end)
 
+	local maxYield = maxYield or math.huge
 	local startTime = tick()
+
 	while not isFinished and tick() - startTime < maxYield do
 		runService.Heartbeat:Wait()
 	end

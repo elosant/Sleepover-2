@@ -27,6 +27,9 @@ function LoadingManager.init()
 	local preloadFinished
 	-- Show progress in loadingView
 	spawn(function()
+		while not signalLib.asyncSubscriptionExists("showAssetsLeft") or not signalLib.asyncSubscriptionExists("preloadFinished") do
+			runService.Heartbeat:Wait()
+		end
 		while not preloadFinished do
 			signalLib.dispatchAsync("showAssetsLeft", contentProvider.RequestQueueSize)
 			runService.Heartbeat:Wait()

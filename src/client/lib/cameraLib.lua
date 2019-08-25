@@ -92,14 +92,22 @@ function CameraLib.update()
 end
 
 function CameraLib.setFocus(part, offset)
-	if part then
-		camera.CameraType = Enum.CameraType.Scriptable
-	end
+	camera.CameraType = Enum.CameraType[part and "Scriptable" or "Custom"]
+
 	CameraLib.focusPart = part
 	CameraLib.focusOffset = offset or Vector3.new(0, 0, 0)
 end
 
 function CameraLib.setFog(radius, fogColor)
+end
+
+function CameraLib.setBlur(blurSize, tweenDuration, initialBlurSize)
+	cameraBlur.Size = initialBlurSize
+	tweenService:Create(
+		cameraBlur,
+		TweenInfo.new(tweenDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+		{ Size = blurSize }
+	):Play()
 end
 
 runService:BindToRenderStep("CameraUpdate",  Enum.RenderPriority.Last.Value, CameraLib.update)

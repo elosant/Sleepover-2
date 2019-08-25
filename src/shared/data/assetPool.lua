@@ -11,6 +11,9 @@ return {
 		CountdownTenMale = 3539835608,
 		DoYouRead = 3539980148,
 		UnfunnySound = 138143457,
+		ChewSound = 22593942,
+		PeanutButterReaction = 0,
+		LaughterTrack = 0,
 	},
 	Accessory = {
 		["Space Helmet"] = 1081366

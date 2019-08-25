@@ -53,7 +53,6 @@ local function onOptionClicked(optionFrame)
 	chosenDecisionFrame = optionFrame
 
 	if isVote then
-		print("is vote")
 		signalLib.dispatchAsync("voteOptionClicked", optionTextLabel.Text)
 		return
 	end

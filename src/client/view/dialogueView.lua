@@ -95,7 +95,7 @@ function DialogueView.moveSpeakerFrame(toOpen, speakerIndex, speakers)
 		end
 	end
 
-	local fadeTweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	local fadeTweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
 	local tween = tweenService:Create(
 		speakerFrame,

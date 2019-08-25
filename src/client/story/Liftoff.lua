@@ -157,6 +157,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 	end
 
 	-- Transition to night
+	--[[
 	local transitionToTime = 24
 	spawn(function()
 		while not targetReached do
@@ -172,6 +173,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 			wait()
 		end
 	end)
+	--]]
 
 	-- Wait until (first) target reached
 	movementTween.Completed:Wait()
@@ -311,7 +313,6 @@ signalLib.subscribeAsync("moveShuttle", function()
 		wait(1)
 
 		cameraLib.setFocus()
-		camera.CameraType = Enum.CameraType.Custom
 	end)
 end)
 
