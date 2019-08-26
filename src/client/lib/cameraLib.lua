@@ -2,6 +2,7 @@
 local runService = game:GetService("RunService")
 local playersService = game:GetService("Players")
 local lightingService = game:GetService("Lighting")
+local tweenService = game:GetService("TweenService")
 
 -- Player
 local player = playersService.LocalPlayer
@@ -25,6 +26,7 @@ CameraLib.shakeOscillator = DampedSine.new(
 	shakeData.angularFrequency
 )
 CameraLib.focusPart = nil
+CameraLib.isTweening = false
 
 local shakeOscillator = CameraLib.shakeOscillator
 local cameraBlur do
@@ -39,6 +41,9 @@ function CameraLib.shake(...)
 end
 
 function CameraLib.update()
+	if CameraLib.isTweening then
+		return
+	end
 	-- Set focus if focusPart exists
 	if CameraLib.focusPart then
 		-- focusRestCFrame is the cframe the camera is set to if focusing on part
@@ -96,6 +101,29 @@ function CameraLib.setFocus(part, offset)
 
 	CameraLib.focusPart = part
 	CameraLib.focusOffset = offset or Vector3.new(0, 0, 0)
+end
+
+function CameraLib.tweenCFrame(targetCFrame, duration, tweenInfo)
+	CameraLib.isTweening = true
+	camera.CameraType = Enum.CameraType.Scriptable
+
+	if not tweenInfo then
+		tweenInfo = TweenInfo.new(duration or 1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	end
+
+	local cameraTween = tweenService:Create(
+		camera,
+		tweenInfo,
+		{ CFrame = targetCFrame }
+	)
+
+	cameraTween:Play()
+	cameraTween.Completed:Connect(function()
+		CameraLib.isTweening = false
+		if not CameraLib.focusPart then
+			camera.CameraType = Enum.CameraType.Custom
+		end
+	end)
 end
 
 function CameraLib.setFog(radius, fogColor)
