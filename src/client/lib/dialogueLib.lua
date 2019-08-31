@@ -91,4 +91,8 @@ function DialogueLib.quitSpeaker(speaker)
 	speakers[speakerIndex] = false
 end
 
+function DialogueLib.onCinematicViewToggle(enabled)
+	dialogueView.onCinematicViewToggle(enabled)
+end
+
 return DialogueLib

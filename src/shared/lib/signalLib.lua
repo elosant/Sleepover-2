@@ -59,6 +59,7 @@ function signalLib.subscribe(label, callback)
 	signalLib.signals.sync[label] = callback
 end
 
+-- Can also be done with waitForSignal utility
 function signalLib.wait(label)
 	local pausedLabelArray = signalLib.paused[label] or {}
 	signalLib.paused[label] = pausedLabelArray

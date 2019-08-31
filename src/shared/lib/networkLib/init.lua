@@ -32,6 +32,30 @@ local networkLib = {}
 networkLib.Listeners = {}
 networkLib.Callbacks = {}
 
+function networkLib.listenerExists(label)
+	return not not networkLib.Listeners[label]
+end
+
+function networkLib.callbackExists(label)
+	return not not networkLib.Callbacks[label]
+end
+
+function networkLib.disconnectListener(label, listenerFunc)
+	if not networkLib.callbackExists(label) then
+		return
+	end
+
+	for index, callbackFunc in pairs(networkLib.Callbacks[label]) do
+		if callbackFunc == listenerFunc then
+			networkLib.Callbacks[label][index] = nil
+		end
+	end
+end
+
+function networkLib.disconnectCallback(label)
+	networkLib.Callbacks[label] = nil
+end
+
 function networkLib.onClientInvoke(label, func) -- Callback bound to client.
 	-- Preconditions.
 	if not IsValidRequest(false, label) then

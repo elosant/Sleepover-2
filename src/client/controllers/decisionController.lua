@@ -19,6 +19,11 @@ local signalLib = require(sharedLib.signalLib)
 
 -- Outbound/Inbound
 local function chooseOptionCallback(question, options, time)
+	if not question or not options then
+		warn((not question and "Question" or "Options") .. " not passed!")
+		return
+	end
+
 	decisionView.onOptionsGiven(question, options, time)
 
 	local function decisionChosenCallback(option)
@@ -31,7 +36,6 @@ local function chooseOptionCallback(question, options, time)
 end
 
 local function startVoteCallback(question, options, time)
-	print(question, options, time)
 	decisionView.onOptionsGiven(question, options, time, true)
 
 	local function votedCallback(option)

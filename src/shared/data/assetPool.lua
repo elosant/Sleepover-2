@@ -14,6 +14,7 @@ return {
 		ChewSound = 22593942,
 		PeanutButterReaction = 0,
 		LaughterTrack = 0,
+		IntenseSituation = 0,
 	},
 	Accessory = {
 		["Space Helmet"] = 1081366

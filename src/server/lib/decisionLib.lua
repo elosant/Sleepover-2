@@ -31,7 +31,7 @@ function DecisionLib.giveOptionsToPlayer(player, question, options, time)
 		wait()
 	end
 
-	return chosenOption
+	return chosenOption or options[1]
 end
 
 function DecisionLib.startVote(question, options, time)

@@ -1,5 +1,6 @@
 -- Services
 local replicatedStorage = game:GetService("ReplicatedStorage")
+local runService = game:GetService("RunService")
 
 local shared = replicatedStorage.shared
 
@@ -12,7 +13,7 @@ local entityPool = require(sharedData.entityPool)
 local system = {}
 system.__index = system
 
-function system.new(componentName)
+function system.new(componentName, updateRate)
 	local systemPool = entityPool.componentEntityMap[componentName] or {}
 	entityPool.componentEntityMap[componentName] = systemPool
 
@@ -37,6 +38,25 @@ function system.new(componentName)
 			self:onEntitySignal(entityId, ...)
 		end
 	end)
+
+	if not updateRate or updateRate == "frame" then -- Explicitly passing "frame" is preferred
+		runService.Heartbeat:Connect(function(step)
+			if not system.update then
+				return
+			end
+
+			debug.profilebegin("system_step: " .. module.Name)
+			system:update(step)
+			debug.profileend("system_step: " .. module.Name)
+		end)
+	elseif type(updateRate) == "number" then
+		while true do
+			wait(updateRate)
+			if system.update then
+				system:update()
+			end
+		end
+	end
 
 	return self
 end

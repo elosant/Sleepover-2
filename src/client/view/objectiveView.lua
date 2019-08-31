@@ -2,6 +2,7 @@
 local playersService = game:GetService("Players")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local runService = game:GetService("RunService")
+local pathfindingService = game:GetService("PathfindingService")
 
 -- Player
 local player = playersService.LocalPlayer
@@ -16,7 +17,7 @@ local objectives = {}
 
 local isFrameVisible
 local arrow
-local arrowTarget
+local worldTarget
 
 -- Will shift any objective with the same position downards, or delete it once full
 function ObjectiveView.onNewObjective(objective, position)
@@ -59,9 +60,52 @@ end
 
 -- Arrow
 function ObjectiveView.onNewWorldObjective(targetPos)
-	arrowTarget = targetPos
 	local character = player.Character or player.CharacterAdded:Wait()
 
+	-- Preferably try to compute a path first, before doing an arrow
+	do
+		local pathObj = pathfindingService:CreatePath()
+		pathObj:ComputeAsync(character.PrimaryPart.Position, targetPos)
+
+		if pathObj.Status == Enum.PathStatus.Success then
+			local pathParts = {}
+
+			while worldTarget == targetPos do
+				local tempPathObj = pathfindingService:CreatePath()
+				tempPathObj:ComputeAsync(character.PrimaryPart.Position, targetPos)
+
+				if tempPathObj.Status == Enum.PathStatus.Success then
+					pathObj = tempPathObj
+				else
+					tempPathObj:Destroy()
+				end
+
+				local waypointArray = pathObj:GetWaypoints()
+				for _, waypoint in ipairs(waypointArray) do
+					print(waypoint.Position)
+					if not pathParts[waypoint.Position] then
+						local pathPart = Instance.new("Part")
+						pathPart.Parent = workspace
+						pathPart.Position = waypoint.Position
+						pathPart.Size = Vector3.new(1, 1, 1)
+						pathPart.Anchored = true
+						pathPart.Material = Enum.Material.Neon
+						pathPart.Color = Color3.new(1, 1, 1)
+						pathParts[waypoint.Position] = pathPart
+					end
+				end
+				wait(0.2)
+			end
+
+			for _, pathPart in pairs(pathParts) do
+				pathPart:Destroy()
+			end
+
+			return
+		end
+	end
+
+	worldTarget = targetPos
 	if not arrow then
 		arrow = replicatedStorage.Arrow:Clone()
 		arrow.Parent = workspace
@@ -70,7 +114,7 @@ function ObjectiveView.onNewWorldObjective(targetPos)
 	end
 
 	spawn(function()
-		while arrowTarget == targetPos do
+		while worldTarget and worldTarget == targetPos do
 			local normalDir = (targetPos - character.HumanoidRootPart.Position).Unit
 			arrow.CFrame = CFrame.new(
 				character.HumanoidRootPart.Position + 4*normalDir,
@@ -78,6 +122,7 @@ function ObjectiveView.onNewWorldObjective(targetPos)
 			)
 			runService.Heartbeat:Wait()
 		end
+		arrow:Destroy()
 	end)
 end
 
@@ -113,8 +158,7 @@ function ObjectiveView.onObjectiveRemoved(objective)
 end
 
 function ObjectiveView.onWorldObjectiveRemoved()
-	arrow:Destroy()
-	arrowTarget = nil
+	worldTarget = nil
 end
 
 return ObjectiveView

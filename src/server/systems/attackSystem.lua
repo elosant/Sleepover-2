@@ -12,7 +12,7 @@ local shared = replicatedStorage.shared
 local sharedClasses = shared.classes
 local system = require(sharedClasses.system)
 
-local AttackSystem = system.new(attackComponent.Name)
+local AttackSystem = system.new(attackComponent.Name, "frame")
 AttackSystem.__index = AttackSystem
 setmetatable(AttackSystem, AttackSystem)
 

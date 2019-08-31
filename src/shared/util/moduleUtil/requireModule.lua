@@ -57,11 +57,6 @@ return function(moduleType, module)
 				return
 			end
 
-			runService.Heartbeat:Connect(function(step)
-				debug.profilebegin("system_step: " .. module.Name)
-				data:update(step)
-				debug.profileend("system_step: " .. module.Name)
-			end)
 		end
 	end)
 

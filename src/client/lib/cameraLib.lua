@@ -1,11 +1,13 @@
 -- Services
-local runService = game:GetService("RunService")
 local playersService = game:GetService("Players")
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local runService = game:GetService("RunService")
 local lightingService = game:GetService("Lighting")
 local tweenService = game:GetService("TweenService")
 
 -- Player
 local player = playersService.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 local camera = workspace.CurrentCamera
 
 local playerScripts = player.PlayerScripts
@@ -18,6 +20,11 @@ local data = client.data
 local cameraData = require(data.cameraData)
 
 local shakeData = cameraData.shakeData
+
+local shared = replicatedStorage.shared
+
+local sharedLib = shared.lib
+local signalLib = require(sharedLib.signalLib)
 
 local CameraLib = {}
 CameraLib.shakeOscillator = DampedSine.new(
@@ -96,6 +103,7 @@ function CameraLib.update()
 	cameraBlur.Size = shakeOscillator:getValue()*2.5
 end
 
+local cframeTweenConnection
 function CameraLib.setFocus(part, offset)
 	camera.CameraType = Enum.CameraType[part and "Scriptable" or "Custom"]
 
@@ -104,11 +112,15 @@ function CameraLib.setFocus(part, offset)
 end
 
 function CameraLib.tweenCFrame(targetCFrame, duration, tweenInfo)
+	if cframeTweenConnection then
+		cframeTweenConnection:Disconnect()
+	end
+
 	CameraLib.isTweening = true
 	camera.CameraType = Enum.CameraType.Scriptable
 
 	if not tweenInfo then
-		tweenInfo = TweenInfo.new(duration or 1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		tweenInfo = TweenInfo.new(duration or 1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 	end
 
 	local cameraTween = tweenService:Create(
@@ -118,12 +130,12 @@ function CameraLib.tweenCFrame(targetCFrame, duration, tweenInfo)
 	)
 
 	cameraTween:Play()
-	cameraTween.Completed:Connect(function()
-		CameraLib.isTweening = false
-		if not CameraLib.focusPart then
-			camera.CameraType = Enum.CameraType.Custom
-		end
-	end)
+	wait(tweenInfo.Time)
+
+	CameraLib.isTweening = false
+	if not CameraLib.focusPart then
+		camera.CameraType = Enum.CameraType.Custom
+	end
 end
 
 function CameraLib.setFog(radius, fogColor)
@@ -136,6 +148,46 @@ function CameraLib.setBlur(blurSize, tweenDuration, initialBlurSize)
 		TweenInfo.new(tweenDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
 		{ Size = blurSize }
 	):Play()
+end
+
+function CameraLib.enableCinematicView(enable, length)
+	local cinematicGui = playerGui.CinematicGui
+	local topBar = cinematicGui.TopBar
+	local bottomBar = cinematicGui.BottomBar
+
+	signalLib.dispatchAsync("cinematicViewToggled", enable)
+
+	-- Don't need to actually do 21:9, most players are on mobile so it'll look weird anyway.
+	topBar:TweenPosition(
+		UDim2.new(0, 0, enable and 0 or -0.11, -36),
+		Enum.EasingDirection.Out,
+		Enum.EasingStyle.Quart,
+		1.5
+	)
+	bottomBar:TweenPosition(
+		UDim2.new(0, 0, enable and 1 or 1.11, 0),
+		Enum.EasingDirection.Out,
+		Enum.EasingStyle.Quart,
+		1.5
+	)
+
+	if enable and length then
+		wait(length)
+		signalLib.dispatchAsync("cinematicViewToggled", false)
+
+		topBar:TweenPosition(
+			UDim2.new(0, 0, 0, -36),
+			Enum.EasingDirection.Out,
+			Enum.EasingStyle.Quart,
+			1.5
+		)
+		bottomBar:TweenPosition(
+			UDim2.new(0, 0, 1.11, 0),
+			Enum.EasingDirection.Out,
+			Enum.EasingStyle.Quart,
+			1.5
+		)
+	end
 end
 
 runService:BindToRenderStep("CameraUpdate",  Enum.RenderPriority.Last.Value, CameraLib.update)

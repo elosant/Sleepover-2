@@ -28,6 +28,8 @@ networkLib.listenToServer("decisionFinished", function(player, decisionText)
 	signalLib.dispatchAsync("dialogueDecisionChosen", player, decisionText)
 end)
 
+signalLib.subscribeAsync("cinematicViewToggled", dialogueLib.onCinematicViewToggle)
+
 -- Outbound
 signalLib.subscribeAsync("dialogueEvent", function(eventName, ...)
 	-- Might be a bit superfluous to do two function calls

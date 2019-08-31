@@ -43,7 +43,7 @@ return function()
 	local mark = station.Mark
 
 	networkLib.fireAllClients("startTour")
-
+	-- TEST
 	wait(5)
 
 	dialogueLib.processDialogue([[
@@ -62,13 +62,17 @@ return function()
 	networkLib.fireAllClients("newObjective", "Meet the Tour Guide")
 	networkLib.fireAllClients("newWorldObjective", kevin.PrimaryPart.Position)
 
-	local detailedShuttle = workspace.DetailedShuttle
-	for _, seat in pairs(detailedShuttle.shuttleBody.seats:GetChildren()) do
-		if seat:FindFirstChild("Seat") then
-			seat.Seat.Disabled = true
+	-- Disable seats to allow for teleportation
+	delay(5, function()
+		local detailedShuttle = workspace.DetailedShuttle
+		for _, seat in pairs(detailedShuttle.shuttleBody.seats:GetChildren()) do
+			if seat:FindFirstChild("Seat") then
+				seat.Seat.Disabled = true
+			end
 		end
-	end
+	end)
 
+	-- Move teacher to kevin
 	for _, waypointPart in pairs(waypoints.teacherToGuide:GetChildren()) do
 		mark.Humanoid:MoveTo(waypointPart.Position)
 		wait(1.2)
@@ -97,6 +101,7 @@ return function()
 		Kevin: First, we need to head into the depressurization chamber, so we can safely enter the ship.
 	]])
 
+	-- Decompression
 	-- Open door locally
 	networkLib.fireAllClients("tweenChamberDoor", true)
 
@@ -106,6 +111,7 @@ return function()
 	wait(1)
 	kevin.Humanoid:MoveTo(chamber.kevinStandPart.Position)
 	waitForSignal(kevin.Humanoid.MoveToFinished, 5)
+	networkLib.fireAllClients("removeWorldObjective")
 
 	wait(2)
 
@@ -152,7 +158,7 @@ return function()
 	dialogueLib.processDialogue([[
 		Kevin: Okay, let's head into the elevator.
 		[w3]
-		Kevin: I think I'll show you the cafeteria first, so we can all grab something to eat before the rest of the tour!
+		Kevin: I think I'll show you the cafeteria first, so we can all grab something to eat before the rest of the tour.
 	]])
 
 	networkLib.fireAllClients("tweenChamberExitDoor", true)
@@ -168,7 +174,7 @@ return function()
 	wait(3)
 
 	moveAllPlayers(chamber.kevinElevatorPart.CFrame + Vector3.new(0, 3, 0), function(character)
-		return character.PrimaryPart.Position.Z < station.elevator.PrimaryPart.Position.Z + 5
+		return character.PrimaryPart.Position.Z > station.elevator.PrimaryPart.Position.Z - 5
 	end)
 
 	networkLib.fireAllClients("tweenChamberExitDoor", false)
@@ -180,6 +186,7 @@ return function()
 	networkLib.fireAllClients("showTransition", 4, "Cafeteria")
 	wait(1)
 
+	-- Cafeteria
 	local cafeteria = station.cafeteria
 	moveAllPlayers(cafeteria.entrance.elevator.elevatorTeleportPart.CFrame + Vector3.new(0, 3, 0))
 	kevin:SetPrimaryPartCFrame(cafeteria.entrance.elevator.elevatorTeleportPart.CFrame + Vector3.new(0, 3, 0))
@@ -301,33 +308,43 @@ return function()
 
 	networkLib.fireAllClients("removeObjective", "Relax and discuss the school trip so far")
 
+	-- Let allergicPlayer choose from a single dialogueOption for this specific section,
+	-- set camera focus on this player.
 	local allergicPlayer = getRandomPlayer()
-	print(allergicPlayer, allergicPlayer.Name)
 
-	dialogueLib.processDialogue([[
-		[n%s]
-		%s: Wait a minute guys... I'm allergic to peanut butter!!
+	-- Return value is not needed since we have a single option (as a constant literal in the dialogue too)
+	decisionLib.giveOptionsToPlayer(
+		allergicPlayer,
+		"Choose what to say",
+		{ "I'm allergic to peanuts!!" },
+		5
+	)
+
+	dialogueLib.processDialogue(string.gsub([[
+		[nallergicPlayer,1]
+		allergicPlayer: But wait, I'm allergic to peanut butter!?
 		[w3]
-	]], allergicPlayer.Name, allergicPlayer.Name, allergicPlayer.Name) -- Messy, write a utility to do substitution easily
+	]], "allergicPlayer", allergicPlayer.Name))
 
 	networkLib.fireAllClients("playAmbientSound", assetPool.PeanutButterReaction)
 
-	dialogueLib.processDialogue(string.format([[
-		[q%s]
-		Kevin: Good one %s! We all know that allergies were cured hundreds of years ago!
-		[q%s]
-	]], allergicPlayer.Name, allergicPlayer.Name, allergicPlayer.Name))
+	dialogueLib.processDialogue(string.gsub([[
+		Kevin: Good one allergicPlayer! We all know that allergies were cured hundreds of years ago!
+		[qallergicPlayer]
+	]], "allergicPlayer", allergicPlayer.Name))
 
 	networkLib.fireAllClients("playAmbientSound", assetPool.LaughterTrack)
 
+	wait(2)
 	dialogueLib.processDialogue([[
 		Kevin: Okay... now that we're done eating, lets head to one of the labs!
 		[w2]
 		Kevin: We have a really impressive specimen on display. I'm sure you'll all love this!
-		[w3]
+		[w2]
+		[qKevin]
 	]])
 
-	networkLib.fireAllClients("tweenExitElevatorDoor", true)
+	networkLib.fireAllClients("tweenCafeExitDoor", true)
 
 	networkLib.fireAllClients("newObjective", "Follow Kevin to see the specimen")
 	networkLib.fireAllClients("newWorldObjective", cafeteria.exit.elevator.PrimaryPart.Position)
@@ -336,16 +353,54 @@ return function()
 	waitForSignal(kevin.Humanoid.MoveToFinished, 5)
 	wait(3)
 
-	moveAllPlayers(cafeteria.exit.elevator.PrimaryPart.Position, function(character)
-		return character.PrimaryPart.Position.Z > cafeteria.exit.elevator.leftDoor.PrimaryPart.Position.Z - 5
+	moveAllPlayers(cafeteria.exit.elevator.PrimaryPart.CFrame + Vector3.new(0, 3, 0), function(character)
+		return character.PrimaryPart.Position.Z < cafeteria.exit.elevator.leftDoor.PrimaryPart.Position.Z + 5
 	end)
 
 	networkLib.fireAllClients("tweenCafeExitDoor", false)
 	wait(1)
 
+	--]]
 	networkLib.fireAllClients("showTransition", 4, "The Specimen")
 	wait(1)
 
+	-- Specimen
 	local lab = station.lab
 	moveAllPlayers(lab.elevator.elevatorTeleportPart.CFrame + Vector3.new(0, 3, 0))
+	kevin:SetPrimaryPartCFrame(lab.elevator.elevatorTeleportPart.CFrame + Vector3.new(0, 3, 0))
+
+	wait(3.5)
+	networkLib.fireAllClients("tweenLabElevatorDoor", true)
+
+	wait(0.5)
+	kevin.Humanoid:MoveTo(lab.kevinStatisSetupPart.Position)
+	waitForSignal(kevin.Humanoid.MoveToFinished, 5)
+
+	-- Play some animation where kevin looks like he's pressing the screen
+	-- Play some sounds to accompany the animation
+
+	--[[
+	kevin.Humanoid:MoveTo(lab.kevinStandPart.Position)
+	waitForSignal(kevin.Humanoid.MoveToFinished, 2)
+	--]]
+
+	networkLib.fireAllClients("fadeDavidGlass")
+
+	dialogueLib.processDialogue([[
+		Kevin: There it is, the NSS' pride and joy!
+		[w2]
+		Kevin: This particular specimen was wreaking havoc on Earth over two thousand years ago.
+		[w2]
+		Kevin: He would jump from host to host, stealing their bodies.
+		[w3]
+		Kevin: Eventually, we were able to capture him after we located a house he was staying in.
+		[w3]
+		Kevin: Apparently, he had been luring in children by pretending to hold “sleepovers”
+		[w1]
+		[qKevin]
+	]])
+
+	-- Flicker lights
+	wait(2)
+	networkLib.fireAllClients("powerFlicker")
 end

@@ -46,7 +46,11 @@ function DialogueView.typeText(speakerIndex, text)
 	end
 
 	do
-		speakerFrame.SpeechTextLabel.TextSize = getTextSize(speakerFrame.SpeechTextLabel, text)
+		speakerFrame.SpeechTextLabel.TextSize = math.clamp(
+			getTextSize(speakerFrame.SpeechTextLabel, text),
+			1,
+			getTextSize(speakerFrame.SpeakerNameLabel, speaker) - 3
+		)
 		speakerFrame.SpeechTextLabel.TextScaled = false
 	end
 
@@ -113,6 +117,26 @@ end
 function DialogueView.editSpeakerName(speakerName, speakerIndex)
 	local speakerFrame = dialogueGui:FindFirstChild(dialogueData.dialogueSpeakerToFrame[tonumber(speakerIndex)]).InnerFrame
 	speakerFrame.SpeakerNameLabel.Text = speakerName
+end
+
+function DialogueView.onCinematicViewToggle(enabled)
+	for _, speakerFrame in pairs(dialogueGui:GetChildren()) do
+		if speakerFrame:IsA("Frame") then
+			local targetPosition = UDim2.new(
+				speakerFrame.Position.X.Scale,
+				speakerFrame.Position.X.Offset,
+				enabled and 0.1 or 0.035,
+				speakerFrame.Position.Y.Offset
+			)
+			speakerFrame:TweenPosition(
+				targetPosition,
+			--	(speakerFrame.Position * UDim2.new(1, 1, 0, 1)) + UDim2.new(0, 0, enabled and 0.1 or 0.035, 0),
+				Enum.EasingDirection.Out,
+				Enum.EasingStyle.Quart,
+				1.6
+			)
+		end
+	end
 end
 
 return DialogueView

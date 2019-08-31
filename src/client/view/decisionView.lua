@@ -159,23 +159,29 @@ function DecisionView.onOptionsGiven(question, options, timer, questionIsVote)
 
 	-- Prepare option frames.
 	for _, optionFrame in pairs(optionsFrame:GetChildren()) do
-		local optionTextLabel = optionFrame.OptionTextLabel
-		local pinImageLabel = optionFrame.PinImageLabel
-		local voteCountLabel = optionFrame.VoteCountLabel
-		local arrowImageLabel = pinImageLabel.ArrowImageLabel
+		if options[tonumber(optionFrame.Name)] then
+			local optionTextLabel = optionFrame.OptionTextLabel
+			local pinImageLabel = optionFrame.PinImageLabel
+			local voteCountLabel = optionFrame.VoteCountLabel
+			local arrowImageLabel = pinImageLabel.ArrowImageLabel
 
-		optionTextLabel.TextColor3 = inactiveAccentColor
-		optionTextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-		optionTextLabel.Text = options[tonumber(optionFrame.Name)]
-		optionTextLabel.TextTransparency = 0
+			optionTextLabel.TextColor3 = inactiveAccentColor
+			optionTextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+			optionTextLabel.Text = options[tonumber(optionFrame.Name)]
+			optionTextLabel.TextTransparency = 0
 
-		pinImageLabel.Rotation = 0
-		pinImageLabel.ImageTransparency = 0
-		arrowImageLabel.Position = UDim2.new(0.67, 0, 0.5, 0)
-		arrowImageLabel.ImageTransparency = 0
+			pinImageLabel.Rotation = 0
+			pinImageLabel.ImageTransparency = 0
+			arrowImageLabel.Position = UDim2.new(0.67, 0, 0.5, 0)
+			arrowImageLabel.ImageTransparency = 0
 
-		voteCountLabel.Text = "0"
-		voteCountLabel.Visible = isVote
+			voteCountLabel.Text = "0"
+			voteCountLabel.Visible = isVote
+
+			optionFrame.Visible = true
+		else
+			optionFrame.Visible = false
+		end
 	end
 
 	decisionFrame:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quint, 0.5, true)

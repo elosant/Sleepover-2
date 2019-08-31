@@ -1,9 +1,11 @@
 -- Services
 local playersService = game:GetService("Players")
 local replicatedStorage = game:GetService("ReplicatedStorage")
+local starterGui = game:GetService("StarterGui")
 
 -- Player
 local player = playersService.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 local camera = workspace.CurrentCamera
 
 local shared = replicatedStorage.shared
@@ -35,6 +37,13 @@ local PlayerManager = {}
 function PlayerManager.init()
 	-- In case the player joins too late, prepare a message before teleport
 	networkLib.listenToServer("lateJoinWarning", onLateJoin)
+
+	pcall(function()
+		starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+		starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+
+		playerGui:SetTopbarTransparency(0.5)
+	end)
 end
 
 return PlayerManager
