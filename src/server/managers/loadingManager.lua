@@ -36,7 +36,8 @@ function LoadingManager.init()
 
 	 -- Wait for players to join, so an accurate number for maxPlayers can be computed in replicationLib.
 	if not runService:IsStudio() then
-		wait(25)
+		-- TEST
+		wait(15)
 	else
 		wait(5)
 	end

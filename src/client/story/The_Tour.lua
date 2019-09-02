@@ -29,13 +29,23 @@ local tweenModel = require(modelUtil.tweenModel)
 
 local audioUtil = sharedUtil.audioUtil
 local playAmbientSound = require(audioUtil.playAmbientSound)
+local fadeOutSound = require(audioUtil.fadeOutSound)
 
 networkLib.listenToServer("startTour", function()
 	signalLib.dispatchAsync("newChapter", "The Tour")
+
+	signalLib.dispatchAsync("playSoundtrack")
+
 	local station = workspace.Station
 	local chamber = station.decompressionChamber
 
+	networkLib.listenToServer("kevinReached", function()
+		cameraLib.setFocus(station.kevinFocusPart, station.kevinCameraPart.Position - station.kevinFocusPart.Position )
+	end)
+
 	networkLib.listenToServer("tweenChamberDoor", function(isOpen)
+		cameraLib.setFocus()
+
 		tweenModel(
 			station.door,
 			station.door.PrimaryPart.CFrame + (isOpen and 1 or -1) * Vector3.new(0, 15, 0),
@@ -43,12 +53,15 @@ networkLib.listenToServer("startTour", function()
 			true
 		)
 
-		wait(6)
-		local cameraCFrame = CFrame.new(chamber.cameraFocusPart.Position, chamber.doorFrame.focusPart.Position)
+		if isOpen then
+			wait(6)
+			local cameraCFrame = CFrame.new(chamber.cameraFocusPart.Position, chamber.doorFrame.focusPart.Position)
 
-		cameraLib.enableCinematicView(true)
-		cameraLib.tweenCFrame(cameraCFrame, 2)
-		cameraLib.setFocus(chamber.cameraFocusPart.CFrame)
+			cameraLib.enableCinematicView(true)
+
+			cameraLib.tweenCFrame(cameraCFrame, 2)
+			cameraLib.setFocus(chamber.cameraFocusPart)
+		end
 	end)
 
 	networkLib.listenToServer("tweenChamberExitDoor", function(isOpen)
@@ -104,6 +117,19 @@ networkLib.listenToServer("startTour", function()
 		tweenElevatorDoor(cafeteria.entrance.elevator, isOpen, -1)
 	end)
 
+	local reactionSound
+	networkLib.listenToServer("allergyScene", function(allergicPlayer)
+--		cameraLib.setFocus(allergicPlayer.Character.Head, Vector3.new(0, 0, 6))
+		reactionSound = playAmbientSound(assetPool.Sound.PeanutButterReaction, nil, true)
+	end)
+
+	networkLib.listenToServer("allergyJokeScene", function(kevin)
+		fadeOutSound(reactionSound, 0.5)
+--		cameraLib.setFocus(kevin.Head, Vector3.new(0, 0, 6))
+--		wait(3)
+--		cameraLib.setFocus()
+	end)
+
 	networkLib.listenToServer("tweenCafeExitDoor", function(isOpen)
 		local elevator = cafeteria.exit.elevator
 		tweenElevatorDoor(elevator, isOpen, 1)
@@ -133,20 +159,20 @@ networkLib.listenToServer("startTour", function()
 			{ Transparency = 0.8 }
 		):Play()
 
-		local cameraCFrame = CFrame.new(lab.David.PrimaryPart.Position + Vector3.new(0, 0, 8), lab.David.PrimaryPart.Position)
+		local cameraCFrame = CFrame.new(lab.David.PrimaryPart.Position + Vector3.new(0, 0, 25), lab.David.PrimaryPart.Position)
 		cameraLib.enableCinematicView(true)
-		cameraLib.setFocus(lab.David.PrimaryPart, Vector3.new(0, 0, -25))
+		cameraLib.setFocus(lab.David.PrimaryPart, Vector3.new(0, 0, 25))
 		cameraLib.tweenCFrame(cameraCFrame, 35)
+
+		playAmbientSound(assetPool.Sound.IntenseSituation)
 	end)
 
 	networkLib.listenToServer("powerFlicker", function()
-		cameraLib.setFocus(lab.glassPart, Vector3.new(0, 0, -8))
-		cameraLib.tweenCFrame(lab.glassPart.CFrame + Vector3.new(0, 0, 8), 1)
-
+		signalLib.dispatchAsync("fadeSoundtrack")
 		tweenService:Create(
 			lightingService,
-			TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-			{ Ambient = Color3.fromRGB(20, 20, 20) }
+			TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{ Ambient = Color3.fromRGB(50, 50, 50) }
 		):Play()
 
 		for _, light in pairs(lab:GetDescendants()) do
@@ -164,10 +190,27 @@ networkLib.listenToServer("startTour", function()
 				):Play()
 			end
 		end
+	end)
+	networkLib.listenToServer("davidActive", function()
+		local cameraCFrame = CFrame.new(lab.David.PrimaryPart.Position + Vector3.new(0, 0, 15), lab.David.PrimaryPart.Position)
 
-		cameraLib.shake(14, 1, 1.1)
+		cameraLib.setFocus(lab.glassPart, Vector3.new(0, 0, 15))
+		cameraLib.tweenCFrame(cameraCFrame, 1)
 
-		playAmbientSound(assetPool.IntenseSituation)
+		playAmbientSound(assetPool.Sound.ThudSound, { Volume = 3 })
+
+		cameraLib.shake(2.3, 1.4, 1.6)
+		wait(0.7)
+
+		-- Temporary bad code
+		local demoGui = player.PlayerGui.DemoGui
+		demoGui.MainFrame.BackgroundTransparency = 0
+		wait(3)
+		for _, uiObject in pairs(demoGui:GetDescendants()) do
+			if uiObject:IsA("GuiBase2d") then
+				require(sharedUtil.guiUtil.fadeObject)(false, uiObject, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out))
+			end
+		end
 	end)
 end)
 

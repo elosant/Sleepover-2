@@ -13,15 +13,18 @@ return {
 		UnfunnySound = 138143457,
 		ChewSound = 22593942,
 		PeanutButterReaction = 0,
-		LaughterTrack = 0,
+		LaughterTrack = 807874496,
 		IntenseSituation = 0,
+		ThudSound = 1843025759,
+		-- Soundtracks
+		WarmUtopia = 3779341054,
 	},
 	Accessory = {
 		["Space Helmet"] = 1081366
 	},
 	Decal = {
 		Unknown = 3618148396,
-		Mark = 0,
-		Kevin = 0
+		Mark = 3780971301,
+		Kevin = 3780970520
 	}
 }

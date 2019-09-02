@@ -91,6 +91,8 @@ return function()
 
 	wait(2)
 
+	networkLib.fireAllClients("kevinReached")
+
 	dialogueLib.processDialogue([[
 		[nKevin]
 
@@ -174,14 +176,14 @@ return function()
 	wait(3)
 
 	moveAllPlayers(chamber.kevinElevatorPart.CFrame + Vector3.new(0, 3, 0), function(character)
-		return character.PrimaryPart.Position.Z > station.elevator.PrimaryPart.Position.Z - 5
+		return character.PrimaryPart.Position.Z < station.elevator.PrimaryPart.Position.Z + 5
 	end)
 
 	networkLib.fireAllClients("tweenChamberExitDoor", false)
 	wait(0.5)
 	networkLib.fireAllClients("tweenChamberElevatorDoor", false)
 
-	wait(2.5)
+	wait(2)
 
 	networkLib.fireAllClients("showTransition", 4, "Cafeteria")
 	wait(1)
@@ -191,6 +193,7 @@ return function()
 	moveAllPlayers(cafeteria.entrance.elevator.elevatorTeleportPart.CFrame + Vector3.new(0, 3, 0))
 	kevin:SetPrimaryPartCFrame(cafeteria.entrance.elevator.elevatorTeleportPart.CFrame + Vector3.new(0, 3, 0))
 
+	wait(2)
 	networkLib.fireAllClients("tweenCafeEntranceDoor", true)
 	wait(3)
 
@@ -320,13 +323,16 @@ return function()
 		5
 	)
 
+	networkLib.fireAllClients("allergyScene", allergicPlayer)
+
 	dialogueLib.processDialogue(string.gsub([[
 		[nallergicPlayer,1]
 		allergicPlayer: But wait, I'm allergic to peanut butter!?
-		[w3]
+		[w4]
 	]], "allergicPlayer", allergicPlayer.Name))
 
-	networkLib.fireAllClients("playAmbientSound", assetPool.PeanutButterReaction)
+
+	networkLib.fireAllClients("allergyJokeScene", kevin)
 
 	dialogueLib.processDialogue(string.gsub([[
 		Kevin: Good one allergicPlayer! We all know that allergies were cured hundreds of years ago!
@@ -336,6 +342,8 @@ return function()
 	networkLib.fireAllClients("playAmbientSound", assetPool.LaughterTrack)
 
 	wait(2)
+	-- Put in unfunny sound
+
 	dialogueLib.processDialogue([[
 		Kevin: Okay... now that we're done eating, lets head to one of the labs!
 		[w2]
@@ -373,7 +381,7 @@ return function()
 	networkLib.fireAllClients("tweenLabElevatorDoor", true)
 
 	wait(0.5)
-	kevin.Humanoid:MoveTo(lab.kevinStatisSetupPart.Position)
+	kevin.Humanoid:MoveTo(lab.kevinStandPart.Position)
 	waitForSignal(kevin.Humanoid.MoveToFinished, 5)
 
 	-- Play some animation where kevin looks like he's pressing the screen
@@ -396,11 +404,24 @@ return function()
 		Kevin: Eventually, we were able to capture him after we located a house he was staying in.
 		[w3]
 		Kevin: Apparently, he had been luring in children by pretending to hold “sleepovers”
-		[w1]
 		[qKevin]
 	]])
 
-	-- Flicker lights
 	wait(2)
+
+	-- Flicker lights
 	networkLib.fireAllClients("powerFlicker")
+	wait(3)
+
+	dialogueLib.processDialogue(string.gsub([[
+		randomPlayer: Who turned off the lights??
+		[w2]
+		Kevin: I don't like this...
+		[w2]
+		[qKevin]
+	]], "randomPlayer", getRandomPlayer().Name))
+
+	wait(3)
+
+	networkLib.fireAllClients("davidActive")
 end

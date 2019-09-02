@@ -66,7 +66,7 @@ local function TypeText(textObject, text)
 end
 
 function IntroView.onStartIntro()
-	--[[ EDIT
+	-- EDIT
 	if IntroView.hasStarted then
 		warn("Attempted to play start intro more than once")
 		return

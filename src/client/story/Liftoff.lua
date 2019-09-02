@@ -131,7 +131,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 	wait(2)
 
 	-- EDIT
-	local movementTween = MoveShuttle(shuttle, target, 1)--25)
+	local movementTween = MoveShuttle(shuttle, target, 25)
 
 	-- Play sounds until reached
 	local targetReached do
@@ -142,9 +142,9 @@ signalLib.subscribeAsync("moveShuttle", function()
 		spawn(function()
 			while not targetReached do
 				--cameraLib.shake(math.random(0.15,0.5), math.random(1,2.5), math.random(1,1.5))
-				cameraLib.shake(0.35, 1, 1)
+				cameraLib.shake(0.25, 1, 1)
 				playAmbientSound(assetPool.Sound.RattleSound, { PlaybackSpeed = 5 })
-				wait(math.random(2.5, 6))
+				wait(math.random(2.5, 4.5))
 			end
 		end)
 
@@ -204,7 +204,7 @@ signalLib.subscribeAsync("moveShuttle", function()
 
 	-- Move inside and above the landing pad
 	target = dockPoints.B.Position
-	TargetShuttle(shuttle, target, 2, 0, 0, 2)
+	TargetShuttle(shuttle, target, 3, 0, 0, 2)
 
 	wait(0.5)
 

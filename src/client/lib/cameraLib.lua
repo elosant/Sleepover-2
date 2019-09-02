@@ -105,8 +105,10 @@ end
 
 local cframeTweenConnection
 function CameraLib.setFocus(part, offset)
+	print(part, offset)
 	camera.CameraType = Enum.CameraType[part and "Scriptable" or "Custom"]
 
+	--print(part)
 	CameraLib.focusPart = part
 	CameraLib.focusOffset = offset or Vector3.new(0, 0, 0)
 end
@@ -130,9 +132,10 @@ function CameraLib.tweenCFrame(targetCFrame, duration, tweenInfo)
 	)
 
 	cameraTween:Play()
-	wait(tweenInfo.Time)
+	wait(duration or 1)
 
 	CameraLib.isTweening = false
+
 	if not CameraLib.focusPart then
 		camera.CameraType = Enum.CameraType.Custom
 	end
@@ -171,9 +174,13 @@ function CameraLib.enableCinematicView(enable, length)
 		1.5
 	)
 
+	signalLib.dispatchAsync("setSoundtrackVolume", enable and 0.8 or 0.35, 1)
+
 	if enable and length then
 		wait(length)
 		signalLib.dispatchAsync("cinematicViewToggled", false)
+
+		signalLib.dispatchAsync("setSoundtrackVolume", 0.35, 1)
 
 		topBar:TweenPosition(
 			UDim2.new(0, 0, 0, -36),

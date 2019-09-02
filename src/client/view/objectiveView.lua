@@ -63,6 +63,7 @@ function ObjectiveView.onNewWorldObjective(targetPos)
 	local character = player.Character or player.CharacterAdded:Wait()
 
 	-- Preferably try to compute a path first, before doing an arrow
+	--[[
 	do
 		local pathObj = pathfindingService:CreatePath()
 		pathObj:ComputeAsync(character.PrimaryPart.Position, targetPos)
@@ -104,6 +105,7 @@ function ObjectiveView.onNewWorldObjective(targetPos)
 			return
 		end
 	end
+	--]]
 
 	worldTarget = targetPos
 	if not arrow then
