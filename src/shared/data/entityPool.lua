@@ -12,14 +12,14 @@ entityPool.componentEntityMap = {}
 entityPool.serialEntityCount = 0
 
 -- Accepts a tuple of components that are registered to on construction.
-function entityPool.createEntity(componentName, componentDataCollection)
+function entityPool.createEntity(componentDataCollection)
 	entityPool.serialEntityCount = entityPool.serialEntityCount + 1
 
 	local entityId = entityPool.serialEntityCount
 
 	entityPool.entities[entityId] = {} -- Associative array containing all components associated with entity.
 
-	for _, componentData in pairs(componentDataCollection) do
+	for componentName, componentData in pairs(componentDataCollection) do
 		entityPool.addComponentToEntity(entityId, componentName, componentData)
 	end
 
