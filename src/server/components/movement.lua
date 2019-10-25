@@ -1,2 +1,0 @@
-return function(npc)
-end

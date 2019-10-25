@@ -4,7 +4,8 @@ local replicatedStorage = game:GetService("ReplicatedStorage")
 
 local server = serverStorage.server
 
-local classes = server.classes
+-- Shared classes
+local classes = replicatedStorage.classes
 local Node = require(classes.node)
 local Digraph = require(classes.digraph)
 
